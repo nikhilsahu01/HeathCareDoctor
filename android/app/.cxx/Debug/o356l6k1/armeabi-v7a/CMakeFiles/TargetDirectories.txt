@@ -1,0 +1,2 @@
+C:/Dhruv/doctors/android/app/.cxx/Debug/o356l6k1/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Dhruv/doctors/android/app/.cxx/Debug/o356l6k1/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,2 @@
+D:/oldProject/HealthCare_7_1_26/healthCare_Doctor/android/app/.cxx/RelWithDebInfo/60e3d5d2/x86_64/CMakeFiles/edit_cache.dir
+D:/oldProject/HealthCare_7_1_26/healthCare_Doctor/android/app/.cxx/RelWithDebInfo/60e3d5d2/x86_64/CMakeFiles/rebuild_cache.dir

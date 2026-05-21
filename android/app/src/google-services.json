@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "103860797567",
+    "project_id": "healthcare-f41eb",
+    "storage_bucket": "healthcare-f41eb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:103860797567:android:ca25cd919122e881ec3f4a",
+        "android_client_info": {
+          "package_name": "com.doctor.doctor_health_care"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFV07jV8h-ZwJDmF6ZhiRrd2gWLBe3eyU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:103860797567:android:a37fa9d130fb47edec3f4a",
+        "android_client_info": {
+          "package_name": "com.user.user_health_care"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFV07jV8h-ZwJDmF6ZhiRrd2gWLBe3eyU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

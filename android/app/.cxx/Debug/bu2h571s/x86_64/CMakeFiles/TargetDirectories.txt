@@ -1,0 +1,2 @@
+C:/Dhruv Projects/healthCare_Doctor/android/app/.cxx/Debug/bu2h571s/x86_64/CMakeFiles/edit_cache.dir
+C:/Dhruv Projects/healthCare_Doctor/android/app/.cxx/Debug/bu2h571s/x86_64/CMakeFiles/rebuild_cache.dir

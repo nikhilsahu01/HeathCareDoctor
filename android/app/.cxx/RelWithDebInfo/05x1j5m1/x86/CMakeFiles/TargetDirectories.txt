@@ -1,0 +1,2 @@
+C:/Dhruv Projects/healthCare_Doctor/android/app/.cxx/RelWithDebInfo/05x1j5m1/x86/CMakeFiles/edit_cache.dir
+C:/Dhruv Projects/healthCare_Doctor/android/app/.cxx/RelWithDebInfo/05x1j5m1/x86/CMakeFiles/rebuild_cache.dir

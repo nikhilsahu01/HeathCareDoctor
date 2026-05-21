@@ -1,0 +1,2 @@
+C:/Dhruv/doctors/android/app/.cxx/RelWithDebInfo/4h6s3y6s/x86/CMakeFiles/edit_cache.dir
+C:/Dhruv/doctors/android/app/.cxx/RelWithDebInfo/4h6s3y6s/x86/CMakeFiles/rebuild_cache.dir

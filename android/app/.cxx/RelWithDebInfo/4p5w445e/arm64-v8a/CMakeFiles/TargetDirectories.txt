@@ -1,0 +1,2 @@
+E:/doctors/android/app/.cxx/RelWithDebInfo/4p5w445e/arm64-v8a/CMakeFiles/edit_cache.dir
+E:/doctors/android/app/.cxx/RelWithDebInfo/4p5w445e/arm64-v8a/CMakeFiles/rebuild_cache.dir
