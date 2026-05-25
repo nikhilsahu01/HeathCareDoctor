@@ -459,22 +459,44 @@ class CompletedAppointmentCard extends StatelessWidget {
 
                               const SizedBox(height: 6),
 
-                              /// STATUS BADGE
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade50,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: const Text(
-                                  "COMPLETED",
-                                  style: TextStyle(
-                                    color: Color(0xFF419CAB),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                              /// STATUS AND EARNINGS ROW
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade50,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text(
+                                      "COMPLETED",
+                                      style: TextStyle(
+                                        color: Color(0xFF419CAB),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  const Spacer(),
+                                  if (model.netEarnings != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.shade50,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        "Earned: ₹${model.netEarnings}",
+                                        style: const TextStyle(
+                                          color: Colors.green,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               )
                             ],
                           ),

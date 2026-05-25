@@ -137,7 +137,12 @@ class _AvailabilityTimingScreenState extends State<AvailabilityTimingScreen> {
                     controller: pro.breakTimeController,
                     keyboardType: TextInputType.number,
                   ),
-                  // 🔹 Break Time (minutes)
+                  const SizedBox(height: 16),
+                  CustomTextFieldProfile(
+                    label: "Buffer Time (minutes)",
+                    controller: pro.bufferTimeController,
+                    keyboardType: TextInputType.number,
+                  ),
                   const SizedBox(height: 16),
                   // 🔹 Lunch Start
                   CustomTextFieldProfile(
@@ -176,7 +181,24 @@ class _AvailabilityTimingScreenState extends State<AvailabilityTimingScreen> {
                   ),
         
                   const SizedBox(height: 24),
-        
+                  
+                  // Mock Slot Validation
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange.shade100,
+                      foregroundColor: Colors.orange.shade900,
+                    ),
+                    onPressed: () {
+                      // Mock validation
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('No overlapping slots detected with current settings.')),
+                      );
+                    },
+                    icon: const Icon(Icons.check_circle_outline),
+                    label: const Text("Validate Slots"),
+                  ),
+                  const SizedBox(height: 24),
+
                   // 🔹 Save Button
                   CustomAppButton(
                     label: 'Save Availability',

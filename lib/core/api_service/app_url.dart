@@ -5,7 +5,7 @@ class AppUrl {
   //live
  // static const String baseUrl = 'https://94np5jjf-5003.inc1.devtunnels.ms';
  //  static const String baseUrl = 'http://192.168.1.9:5003';
-  static const String baseUrl = 'http://159.89.146.245:4587';
+  static const String baseUrl = 'https://admin.olcure.com';
   static const String getOtp = '$baseUrl/api/vendor/auth/sendOtp';
   static const String verifyOtp = '$baseUrl/api/vendor/auth/verifyOtp';
   static const String signUp = '$baseUrl/api/vendor/auth/register';
@@ -19,4 +19,12 @@ class AppUrl {
   static const String doctorsCategory = '$baseUrl/api/vendor/common/category/list';
   static const String symptomsList = '$baseUrl/api/vendor/common/symptoms/list';
   static const String profile = '$baseUrl/api/vendor/auth/profile';
+
+  // New endpoints
+  static const String uploadPrescription = '$baseUrl/api/vendor/appointment/upload-prescription';
+  static const String degreeList = '$baseUrl/api/vendor/common/degree/list';
+  static const String dashboard = '$baseUrl/api/vendor/auth/dashboard';
+  static const String wallet = '$baseUrl/api/vendor/auth/wallet';
+  static const String notifications = '$baseUrl/api/vendor/auth/notifications';
+  static const String cms = '$baseUrl/api/vendor/common/cms';
 }

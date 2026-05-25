@@ -94,6 +94,9 @@ class AppointmentsList {
   String? rescheduleReason;
   String? cancellReason;
   String? createdAt;
+  num? appointmentFee;
+  num? commissionAmount;
+  num? netEarnings;
 
   AppointmentsList(
       {this.appointmentId,
@@ -115,7 +118,10 @@ class AppointmentsList {
         this.rescheduleHistory,
         this.rescheduleReason,
         this.cancellReason,
-        this.createdAt});
+        this.createdAt,
+        this.appointmentFee,
+        this.commissionAmount,
+        this.netEarnings});
 
   AppointmentsList.fromJson(Map<String, dynamic> json) {
     appointmentId = json['appointmentId'];
@@ -143,6 +149,9 @@ class AppointmentsList {
     rescheduleReason = json['rescheduleReason'];
     cancellReason = json['cancellReason'];
     createdAt = json['createdAt'];
+    appointmentFee = json['appointmentFee'];
+    commissionAmount = json['commissionAmount'];
+    netEarnings = json['netEarnings'];
   }
 
   Map<String, dynamic> toJson() {
@@ -170,6 +179,9 @@ class AppointmentsList {
     data['rescheduleReason'] = this.rescheduleReason;
     data['cancellReason'] = this.cancellReason;
     data['createdAt'] = this.createdAt;
+    data['appointmentFee'] = this.appointmentFee;
+    data['commissionAmount'] = this.commissionAmount;
+    data['netEarnings'] = this.netEarnings;
     return data;
   }
 }

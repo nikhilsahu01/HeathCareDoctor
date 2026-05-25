@@ -19,6 +19,10 @@ class ProfileViewModel extends ChangeNotifier {
 
   DoctorsProfileDetails? get profileData => profileDetails;
 
+  // Approval Status
+  String approvalStatus = "approved"; // Mock status: approved, pending, rejected
+  String approvalRemarks = "";
+
   // Controllers
   final nameController = TextEditingController();
   final mobileController = TextEditingController();
@@ -44,6 +48,7 @@ class ProfileViewModel extends ChangeNotifier {
   final openingTimeController = TextEditingController();
   final closingTimeController = TextEditingController();
   final breakTimeController = TextEditingController();
+  final bufferTimeController = TextEditingController(); // new field
   final lunchStartController = TextEditingController();
   final lunchEndController = TextEditingController();
 
@@ -142,6 +147,34 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
+  // ---------------- MOCK APPROVAL & TICKET ----------------
+  Future<void> fetchApprovalStatus() async {
+    // Mock API call
+    await Future.delayed(const Duration(milliseconds: 500));
+    // Default to approved for now. 
+    // approvalStatus = "approved"; 
+    notifyListeners();
+  }
+
+  Future<void> raiseSupportTicket(BuildContext context, String subject, String description) async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      // Mock API call
+      await Future.delayed(const Duration(seconds: 1));
+      HelperMethods.showFloatingToast(
+        context,
+        message: 'Support ticket raised successfully. Ticket ID: #TCK-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}',
+        color: ColorResource.green,
+      );
+    } catch (e) {
+      HelperMethods.showFloatingToast(context, message: 'Failed to raise ticket');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // ---------------- UPDATE PROFILE ----------------
   Future<void> updateProfile(BuildContext context) async {
     isLoading = true;
@@ -209,6 +242,7 @@ class ProfileViewModel extends ChangeNotifier {
         "breakTime": breakTimeController.text.trim(),
         "lunchStart": lunchStartController.text.trim(),
         "lunchEnd": lunchEndController.text.trim(),
+        "bufferTime": bufferTimeController.text.trim(), // new field
       };
 
       final files = <String, File>{};
@@ -216,9 +250,13 @@ class ProfileViewModel extends ChangeNotifier {
       if (certificateFile != null) files["certificate"] = certificateFile!;
 
       profileDetails = await _repo.updateProfileApi(fields: fields, files: files);
+      
+      // MOCK: Set status to pending approval after edit
+      approvalStatus = "pending";
+      
       HelperMethods.showFloatingToast(
         context,
-        message: 'Profile updated successfully!',
+        message: 'Profile changes submitted for admin approval!',
         color: ColorResource.green,
       );
 

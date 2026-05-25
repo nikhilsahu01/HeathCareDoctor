@@ -8,7 +8,12 @@ import 'package:doctors/screens/home/view_model/home_viewModel.dart';
 import 'package:doctors/screens/patients/viewModel/patients_details_viewModel.dart';
 import 'package:doctors/screens/patients/viewModel/appointments_viewModel.dart';
 import 'package:doctors/screens/splash/splash_screen.dart';
+import 'package:doctors/screens/patients/viewModel/appointments_viewModel.dart';
+import 'package:doctors/screens/splash/splash_screen.dart';
 import 'package:doctors/screens/auth/otp/provider/otpProvider.dart';
+import 'package:doctors/screens/wallet/view_model/wallet_view_model.dart';
+import 'package:doctors/screens/appointments/viewModel/upload_prescription_view_model.dart';
+import 'package:doctors/screens/notifications/view_model/notification_view_model.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -74,6 +79,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PatientsDetailsViewModel()),
         ChangeNotifierProvider(create: (_) => JoinCallNotifier()),
         ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => WalletViewModel()),
+        ChangeNotifierProvider(create: (_) => UploadPrescriptionViewModel()),
+        ChangeNotifierProvider(create: (_) => NotificationViewModel()),
       ],
       child: MaterialApp(
         title: 'Doctor',

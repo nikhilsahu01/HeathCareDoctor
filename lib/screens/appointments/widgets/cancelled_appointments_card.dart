@@ -490,22 +490,44 @@ class CancelledAppointmentsCard extends StatelessWidget {
 
                               const SizedBox(height: 6),
 
-                              /// STATUS BADGE
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.shade50,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: const Text(
-                                  "CANCELLED",
-                                  style: TextStyle(
-                                    color: Color(0xFFEB5757),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                              /// STATUS AND EARNINGS ROW
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade50,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text(
+                                      "CANCELLED",
+                                      style: TextStyle(
+                                        color: Color(0xFFEB5757),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  const Spacer(),
+                                  if (model.appointmentFee != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        "Fee: ₹${model.appointmentFee}",
+                                        style: const TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               )
                             ],
                           ),

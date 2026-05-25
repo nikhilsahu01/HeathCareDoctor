@@ -78,6 +78,17 @@ class _OtpScreenState extends State<OtpScreen> {
 
                 const SizedBox(height: 30),
 
+                // Title
+                const Text(
+                  'Verify Your Number',
+                  style: TextStyle(
+                    color: Color(0xFF171C20),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
                 // OTP Sent Text
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -86,12 +97,12 @@ class _OtpScreenState extends State<OtpScreen> {
                       child: Column(
                         children: [
                           const Text(
-                            'We have sent 4 Digit OTP to',
+                            'We have sent a 4 Digit OTP to',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 16,
-                              color: ColorResource.primaryColor,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Color(0xFF6F7881),
+                              fontWeight: FontWeight.w400,
                             ),
                           ),
                           const SizedBox(height: 5),
@@ -99,10 +110,10 @@ class _OtpScreenState extends State<OtpScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                '${widget.countryCode}${widget.mobileNumber}',
+                                '${widget.countryCode} ${widget.mobileNumber}',
                                 style: const TextStyle(
-                                  fontSize: 16,
-                                  color: ColorResource.primaryColor,
+                                  fontSize: 15,
+                                  color: Color(0xFF171C20),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -111,8 +122,8 @@ class _OtpScreenState extends State<OtpScreen> {
                                 onTap: () => Navigator.pop(context),
                                 child: const Icon(
                                   Icons.edit,
-                                  size: 18,
-                                  color: ColorResource.primaryColor,
+                                  size: 16,
+                                  color: Color(0xFF006492),
                                 ),
                               ),
                             ],
@@ -123,7 +134,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 40),
 
                 // OTP Input (Pinput)
                 Form(
@@ -131,18 +142,32 @@ class _OtpScreenState extends State<OtpScreen> {
                   child: Pinput(
                     length: 4,
                     keyboardType: TextInputType.number,
+                    autofillHints: const [AutofillHints.oneTimeCode], // Auto-read OTP
                     defaultPinTheme: PinTheme(
-                      width: 60,
-                      height: 60,
+                      width: 65,
+                      height: 65,
                       textStyle: const TextStyle(
-                        fontSize: 22,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Color(0xFF222B45),
                       ),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: ColorResource.primaryColor),
-                        color: Colors.transparent,
+                        color: const Color(0xFFF0F4FA),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    focusedPinTheme: PinTheme(
+                      width: 65,
+                      height: 65,
+                      textStyle: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF222B45),
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F4FA),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFF006492), width: 2),
                       ),
                     ),
                     onCompleted: (value) => setState(() => otp = value),

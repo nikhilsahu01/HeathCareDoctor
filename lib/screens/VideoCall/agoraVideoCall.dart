@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../../core/coreServices/socket_service/join_call_provider.dart';
 import '../../core/utils/navigation_helper.dart';
+import '../appointments/view/upload_prescription_screen.dart';
 //
 // class AgoraVideoCallScreen extends StatefulWidget {
 //   final String channelName;
@@ -448,7 +449,16 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
             backgroundColor: Colors.red,
             onPressed: () async {
               await _engine?.leaveChannel();
-              if (mounted) Navigator.pop(context);
+              if (mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UploadPrescriptionScreen(
+                      appointmentId: widget.appointmentId,
+                    ),
+                  ),
+                );
+              }
             },
             child: const Icon(Icons.call_end),
           ),

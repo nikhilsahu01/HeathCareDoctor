@@ -14,6 +14,8 @@ import '../Profile/view/professional_details_screen.dart';
 import '../Profile/view/personal_details_screen.dart';
 import '../Profile/view_model/profile_view_model.dart';
 import '../splash/splash_screen.dart';
+import 'cms_screen.dart';
+import '../wallet/ui/walletScreen.dart';
 
 
 
@@ -133,8 +135,18 @@ class _SideDrawerScreenState extends State<SideDrawerScreen> {
                     navSlideFromRight(
                         context, const AvailabilityTimingScreen());
                   }),
-                  _menuButton('Terms & Conditions', () {}),
-                  // _menuButton('Account Settings', () {}),
+                  _menuButton('Terms & Conditions', () {
+                    navSlideFromRight(context, const CmsScreen(title: "Terms & Conditions", cmsKey: "term_condition"));
+                  }),
+                  _menuButton('Privacy Policy', () {
+                    navSlideFromRight(context, const CmsScreen(title: "Privacy Policy", cmsKey: "privacy_policy"));
+                  }),
+                  _menuButton('About Us', () {
+                    navSlideFromRight(context, const CmsScreen(title: "About Us", cmsKey: "about_us"));
+                  }),
+                  _menuButton('Wallet & Earnings', () {
+                    navSlideFromRight(context, const WalletScreen(isToday: false));
+                  }),
                   _menuButton('Log Out', () async {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.clear();
