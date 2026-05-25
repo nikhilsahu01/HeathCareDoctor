@@ -618,7 +618,77 @@ class _CompletedAppointmentsDetailsScreenState
                   ),
                 ),
 
-                const SizedBox(height: 30),const SizedBox(height: 24),
+                // ==================== Consultation Transcript ====================
+                const Text(
+                  "Consultation Transcript",
+                  style: TextStyle(
+                    color: Color(0xFF171C20),
+                    fontSize: 18,
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w600,
+                    height: 1.56,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Consultation Notes & Transcript",
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0F5B7F),
+                        ),
+                        onPressed: () {
+                          // Mock Transcript viewer
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text("Consultation Transcript"),
+                                content: const SingleChildScrollView(
+                                  child: Text(
+                                    "Patient reported severe headaches and light sensitivity. "
+                                    "Advised rest in a dark room and prescribed pain relievers. "
+                                    "Follow-up in 3 days if symptoms persist.\n\n"
+                                    "Detailed Transcript:\n"
+                                    "Doctor: How are you feeling today?\n"
+                                    "Patient: I have a terrible headache, Doctor.\n"
+                                    "Doctor: I see. Let me write you a prescription.",
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text("Close"),
+                                  )
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.description, size: 18),
+                        label: const Text("View"),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
 
                 // ==================== ATTACHMENTS SECTION ====================
                 const Text(

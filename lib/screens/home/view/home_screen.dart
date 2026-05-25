@@ -358,16 +358,50 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 
 
+  bool _hasShownReminder = false;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final pro = Provider.of<HomeViewModel>(context, listen: false);
       pro.fetchHomeData();
       Provider.of<ProfileViewModel>(context, listen: false).fetchProfile();
       final viewModel = Provider.of<AppointmentViewModel>(context, listen: false);
-      viewModel.fetchUpcomingAppointments();
+      await viewModel.fetchUpcomingAppointments();
+      _checkReminder(viewModel);
     });
+  }
+
+  void _checkReminder(AppointmentViewModel viewModel) {
+    if (_hasShownReminder || viewModel.upcomingAppointments.isEmpty) return;
+    
+    final nextAppointment = viewModel.upcomingAppointments.first;
+    // Mock logic: assume the first appointment is starting in 5 mins
+    _hasShownReminder = true;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Appointment Reminder"),
+          content: Text("Your next appointment with ${nextAppointment.patientName ?? 'Patient'} is starting in 5 minutes."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Dismiss"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // Can navigate to waiting room or enable join call
+                Provider.of<JoinCallNotifier>(context, listen: false).enableJoin(nextAppointment.appointmentId ?? '');
+              },
+              child: const Text("Go to Waiting Room"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -713,7 +747,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     _StatCard(
                       title: "Today's Appts",
-                      value: viewModel.totalAppointments,
+                      value: viewModel.dashboardModel?.data?.todayAppointmentsCount ?? 0,
                       icon: Icons.calendar_today_rounded,
                       accentColor:  Color(0xFF419CAB),
                       g1: Color(0xffF3E8FF),
@@ -723,8 +757,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     ),
                     _StatCard(
-                      title: "This Month's Appts",
-                      value: viewModel.monthlyAppointments,
+                      title: "Pending Requests",
+                      value: viewModel.dashboardModel?.data?.pendingRequests ?? 0,
                       icon: Icons.analytics_rounded,
                       accentColor: const Color(0xFF2E83F8),
                       g1: Color(0xffFFF1E6),
@@ -734,7 +768,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     _StatCard(
                       title: "Total Earning Today",
-                      value: viewModel.todayAppointments,
+                      value: viewModel.dashboardModel?.data?.totalEarningsToday ?? 0,
                       icon: Icons.earbuds,
                       accentColor: const Color(0xFFFF9800),
                       g1: Color(0xffE8F5E9),
@@ -746,7 +780,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     _StatCard(
                       title: "Growth",
-                      value: 12, // Placeholder logic for visual logic
+                      value: viewModel.dashboardModel?.data?.growth ?? 0,
                       icon: Icons.trending_up_rounded,
                       accentColor: const Color(0xFF9C27B0),
                       // accentColor: const Color(0xFF9C27B0),
@@ -795,15 +829,21 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  image: DecorationImage(
-                    image: AssetImage("assets/icons/balawant.jpg"),
-                    fit: BoxFit.cover,
-                  ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: model.patientImage != null && model.patientImage!.isNotEmpty
+                      ? Image.network(
+                          model.patientImage!.startsWith('http') 
+                                ? model.patientImage! 
+                                : '${AppUrl.baseUrl}/${model.patientImage!}',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => 
+                              Image.asset("assets/icons/balawant.jpg", fit: BoxFit.cover),
+                        )
+                      : Image.asset("assets/icons/balawant.jpg", fit: BoxFit.cover),
                 ),
               ),
               const SizedBox(width: 16),
@@ -817,9 +857,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Text(
-                        'STARTING NOW',
-                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700),
+                      child: Text(
+                        canJoin ? 'PATIENT WAITING' : 'STARTING SOON',
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -862,13 +902,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // Start Consultation Button with Video Call
               GestureDetector(
-                onTap: canJoin
-                    ? () => _handleJoinCall(context, model)
-                    : null,
+                onTap: () {
+                  if (canJoin) {
+                    _handleJoinCall(context, model);
+                  } else {
+                    HelperMethods.showFloatingToast(context, message: "Patient has not joined or appointment hasn't started yet.");
+                  }
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: canJoin ? Colors.white : Colors.white.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(25),
                   ),
                   child: Row(
@@ -912,16 +956,20 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
+          ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: Container(
+              width: 48,
+              height: 48,
               color: const Color(0xFFE4E8EE),
-              borderRadius: BorderRadius.circular(32),
-              image: DecorationImage(
-                image: NetworkImage(model.patientImage ?? "https://t4.ftcdn.net/jpg/06/10/87/07/360_F_610870738_xBnYHvfBrRFVpVkUUT3PkVc7TZdukIlx.jpg"),
-                fit: BoxFit.cover,
-              ),
+              child: model.patientImage != null && model.patientImage!.isNotEmpty
+                  ? Image.network(
+                      model.patientImage!.startsWith('http') ? model.patientImage! : '${AppUrl.baseUrl}/${model.patientImage!}',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => 
+                          Image.network("https://t4.ftcdn.net/jpg/06/10/87/07/360_F_610870738_xBnYHvfBrRFVpVkUUT3PkVc7TZdukIlx.jpg", fit: BoxFit.cover),
+                    )
+                  : Image.network("https://t4.ftcdn.net/jpg/06/10/87/07/360_F_610870738_xBnYHvfBrRFVpVkUUT3PkVc7TZdukIlx.jpg", fit: BoxFit.cover),
             ),
           ),
           const SizedBox(width: 12),
@@ -1102,7 +1150,39 @@ class _ProfileStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int percent = (completion * 100).toInt();
+    double normalizedCompletion = completion;
+    if (completion > 1.0) {
+      normalizedCompletion = completion / 100.0;
+    }
+    
+    // Fallback to local calculation if it is 0
+    if (normalizedCompletion == 0.0) {
+      try {
+        final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+        final data = profileVM.profileData?.data;
+        if (data != null) {
+          int filled = 0;
+          int total = 14;
+          if (data.name != null && data.name!.isNotEmpty) filled++;
+          if (data.mobile != null && data.mobile!.isNotEmpty) filled++;
+          if (data.dob != null && data.dob!.isNotEmpty) filled++;
+          if (data.gender != null && data.gender!.isNotEmpty) filled++;
+          if (data.email != null && data.email!.isNotEmpty) filled++;
+          if (data.specialization != null && data.specialization!.isNotEmpty) filled++;
+          if (data.qualification != null && data.qualification!.isNotEmpty) filled++;
+          if (data.yearOfExp != null && data.yearOfExp!.isNotEmpty) filled++;
+          if (data.licOrRegNumber != null && data.licOrRegNumber!.isNotEmpty) filled++;
+          if (data.address != null && data.address!.isNotEmpty) filled++;
+          if (data.profileImage != null && data.profileImage!.isNotEmpty) filled++;
+          if (data.inClinicFee != null || data.videoConsultFee != null) filled++;
+          if (data.openingTime != null && data.openingTime!.isNotEmpty) filled++;
+          if (data.closingTime != null && data.closingTime!.isNotEmpty) filled++;
+          normalizedCompletion = filled / total;
+        }
+      } catch (_) {}
+    }
+
+    final int percent = (normalizedCompletion * 100).toInt();
 
     return Container(
       width: double.infinity,
@@ -1149,7 +1229,7 @@ class _ProfileStatusCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
-              value: completion,
+              value: normalizedCompletion,
               backgroundColor: Color(0xFFDFE3E9),
               valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF006492)),
               minHeight: 10,

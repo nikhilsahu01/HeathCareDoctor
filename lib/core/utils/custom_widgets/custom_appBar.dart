@@ -7,12 +7,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool isBack;
   final bool isProfile;
+  final Widget? action;
 
   const CustomAppBar({
     super.key,
     required this.title,
     this.isBack = true,
     this.isProfile = false,
+    this.action,
   });
 
   @override
@@ -64,7 +66,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 40),
+            if (action != null)
+              action!
+            else
+              const SizedBox(width: 40),
           ],
         ),
       ),

@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.doctor.doctor_health_care"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = "26.1.10909125"
 
     compileOptions {

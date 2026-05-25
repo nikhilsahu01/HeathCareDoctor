@@ -5,6 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Background message received: ${message.notification?.title}");
+  if (message.notification != null) {
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        channelKey: 'basic_channel',
+        title: message.notification?.title,
+        body: message.notification?.body,
+        notificationLayout: NotificationLayout.BigPicture,
+        bigPicture: message.notification?.android?.imageUrl ?? message.data?['image'],
+        payload: {'screen': message.data?['screen'] ?? 'home', 'id': message.data?['id']},
+      ),
+    );
+  }
+}
 
 class FirebaseNotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -14,6 +30,9 @@ class FirebaseNotificationService {
   Future<void> init() async {
     if (_isInitialized) return;
     _isInitialized = true;
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
 
     // context = passedContext;
 
@@ -36,6 +55,8 @@ class FirebaseNotificationService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("deviceToken", token);
         print("📲 FCM Token: $token");
+        // MOCK: Save FCM token to backend
+        _mockSaveTokenToBackend(token);
       }
 
       // 🎯 Foreground Notifications
@@ -51,7 +72,7 @@ class FirebaseNotificationService {
               body: message.notification?.body,
               notificationLayout: NotificationLayout.BigPicture,
               bigPicture: message.notification?.android?.imageUrl ?? message.data['image'],
-              payload: {'screen': 'home'},
+              payload: {'screen': message.data['screen'] ?? 'home', 'id': message.data['id']},
             ),
           );
         }
@@ -76,7 +97,19 @@ class FirebaseNotificationService {
   Future<void> handleNotificationAction(ReceivedAction action, BuildContext context) async {
     if (action.payload?['screen'] == 'home') {
 
+    } else if (action.payload?['screen'] == 'appointment_details') {
+      // Redirect to appointment details
+      final id = action.payload?['id'];
+      if (id != null) {
+        // e.g. Navigator.pushNamed(context, '/appointment_details', arguments: id);
+        print("Redirecting to appointment $id");
+      }
     }
   }
 
+  Future<void> _mockSaveTokenToBackend(String token) async {
+    // Simulating API call
+    await Future.delayed(const Duration(seconds: 1));
+    print("MOCK API: Saved FCM Token $token successfully");
+  }
 }

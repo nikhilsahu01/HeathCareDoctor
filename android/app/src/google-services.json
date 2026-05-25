@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "103860797567",
-    "project_id": "healthcare-f41eb",
-    "storage_bucket": "healthcare-f41eb.firebasestorage.app"
+    "project_number": "1041818683963",
+    "project_id": "olcure-healthcare",
+    "storage_bucket": "olcure-healthcare.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:103860797567:android:ca25cd919122e881ec3f4a",
+        "mobilesdk_app_id": "1:1041818683963:android:8e329bb9c67019d24b6a1e",
         "android_client_info": {
           "package_name": "com.doctor.doctor_health_care"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAFV07jV8h-ZwJDmF6ZhiRrd2gWLBe3eyU"
+          "current_key": "AIzaSyDIGLHK4uaiq6Oholjk0VM9oQDmzK1tWQ4"
         }
       ],
       "services": {
@@ -26,7 +26,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:103860797567:android:a37fa9d130fb47edec3f4a",
+        "mobilesdk_app_id": "1:1041818683963:android:9592da5d0ee0565f4b6a1e",
         "android_client_info": {
           "package_name": "com.user.user_health_care"
         }
@@ -34,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAFV07jV8h-ZwJDmF6ZhiRrd2gWLBe3eyU"
+          "current_key": "AIzaSyDIGLHK4uaiq6Oholjk0VM9oQDmzK1tWQ4"
         }
       ],
       "services": {

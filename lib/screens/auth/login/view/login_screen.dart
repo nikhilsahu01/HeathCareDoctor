@@ -331,7 +331,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
                             initialCountryCode: 'IN',
-                            showDropdownIcon: false,
+                            showDropdownIcon: true,
                             showCountryFlag: true, // Switched to true for better UX
                             dropdownIcon: const Icon(
                                 Icons.keyboard_arrow_down_rounded,
@@ -348,6 +348,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             cursorColor: kPrimaryColor,
                             keyboardType: TextInputType.number,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
                             decoration: InputDecoration(
                               hintText: '000 000 0000',
                               hintStyle: TextStyle(color: kSubtitleColor.withOpacity(0.5)),
@@ -356,10 +357,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
-                              // focusedBorder: OutlineInputBorder(
-                              //   borderSide: const BorderSide(color: kPrimaryColor, width: 1.5),
-                              //   borderRadius: BorderRadius.circular(16),
-                              // ),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                               counterText: '',
                             ),

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../model/home_model.dart';
+import '../model/dashboard_model.dart';
 import '../repository/home_repository.dart';
 
 class HomeViewModel extends ChangeNotifier {
-  HomeDataModel? _homeDataModel;
+  final _repository = HomeRepository();
+  DashboardModel? _dashboardModel;
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Dummy values
-  int totalAppointments = 1994;
-  int monthlyAppointments = 18;
-  int todayAppointments = 8;
-  double profileCompletion = 0.70;
+  int totalAppointments = 0;
+  int monthlyAppointments = 0;
+  int todayAppointments = 0;
+  double profileCompletion = 0.0;
 
-  HomeDataModel? get homeDataModel => _homeDataModel;
+  DashboardModel? get dashboardModel => _dashboardModel;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -23,15 +23,21 @@ class HomeViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final response = await _repository.getDashboardApi();
+      _dashboardModel = response;
 
-    // Assign dummy values
-    totalAppointments = 1994;
-    monthlyAppointments = 18;
-    todayAppointments = 8;
-    profileCompletion = 0.7;
+      todayAppointments = response.data?.todayAppointmentsCount ?? 0;
+      monthlyAppointments = response.data?.monthlyAppointments ?? 0;
+      totalAppointments = response.data?.totalAppointments ?? 0;
+      profileCompletion = response.data?.profileCompletion ?? 0.0;
 
-    _isLoading = false;
-    notifyListeners();
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
   }
 }

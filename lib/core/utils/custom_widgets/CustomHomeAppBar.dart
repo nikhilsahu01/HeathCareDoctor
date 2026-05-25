@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../screens/notifications/view/notification_screen.dart';
 import 'package:provider/provider.dart';
+import '../../api_service/app_url.dart';
 import '../../../screens/Profile/view_model/profile_view_model.dart';
 import '../../../screens/side_drawer/side_drawer_Screen.dart';
 import '../helper_functions/helpers_methods.dart';
@@ -45,24 +47,43 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                       const SideDrawerScreen(),
                     );
                   },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
+                  child: Container(
                     height: 45,
                     width: 45,
-                    decoration: ShapeDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment(0.48, -0.48),
-                        end: Alignment(0.52, 1.48),
-                        colors: [const Color(0xFF006492), const Color(0xFF2D9CDB)],
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(48),
-                      ),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFF006492), width: 2),
                     ),
-                    child: Icon(
-                      Icons.person,
-                      size: 30,
-                      color:  Colors.white ,
+                    child: ClipOval(
+                      child: profile.data?.profileImage != null && profile.data!.profileImage!.isNotEmpty
+                          ? Image.network(
+                              profile.data!.profileImage!.startsWith('http')
+                                  ? profile.data!.profileImage!
+                                  : '${AppUrl.baseUrl}/${profile.data!.profileImage!}',
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment(0.48, -0.48),
+                                      end: Alignment(0.52, 1.48),
+                                      colors: [Color(0xFF006492), Color(0xFF2D9CDB)],
+                                    ),
+                                  ),
+                                  child: const Icon(Icons.person, size: 30, color: Colors.white),
+                                );
+                              },
+                            )
+                          : Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment(0.48, -0.48),
+                                  end: Alignment(0.52, 1.48),
+                                  colors: [Color(0xFF006492), Color(0xFF2D9CDB)],
+                                ),
+                              ),
+                              child: const Icon(Icons.person, size: 30, color: Colors.white),
+                            ),
                     ),
                   ),
                 ),
@@ -101,7 +122,12 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ),
-                Icon(Icons.notifications,size: 30,),
+                GestureDetector(
+                  onTap: () {
+                    navSlideFromRight(context, const NotificationScreen());
+                  },
+                  child: const Icon(Icons.notifications, size: 30),
+                ),
 
 
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../wallet/ui/walletScreen.dart';
 import 'package:provider/provider.dart';
 import '../../../core/utils/custom_widgets/custom_appBar.dart';
 import '../../../core/utils/custom_widgets/custom_refresh.dart';
@@ -268,7 +269,26 @@ class _AppointmentScreenState extends State<AppointmentScreen> with SingleTicker
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'Appointments', isBack: widget.isBack ?? true),
+      appBar: CustomAppBar(
+        title: 'Appointments', 
+        isBack: widget.isBack ?? true,
+        action: GestureDetector(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen(isToday: false)));
+          },
+          child: Container(
+            height: 40,
+            width: 40,
+            decoration: ShapeDecoration(
+              color: const Color(0xFFF0F4FA),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(48),
+              ),
+            ),
+            child: const Icon(Icons.account_balance_wallet, size: 20, color: Color(0xFF006492)),
+          ),
+        ),
+      ),
       body: Consumer<AppointmentViewModel>(
         builder: (context, viewModel, _) {
           return SafeArea(

@@ -67,6 +67,28 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    if (provider.approvalStatus == "pending")
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline, color: Colors.orange),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                "Your profile changes are pending admin approval.",
+                                style: TextStyle(color: Colors.orange.shade900),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     GestureDetector(
                       onTap: () async {
                         final pickedImage = await HelperMethods.showImagePickerOptions(context);
@@ -166,11 +188,66 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                         }
                       },
                     ),
+                    const SizedBox(height: 15),
+                    TextButton.icon(
+                      onPressed: () {
+                        _showTicketDialog(context, provider);
+                      },
+                      icon: const Icon(Icons.support_agent, color: ColorResource.primaryColor),
+                      label: const Text(
+                        "Raise Support Ticket",
+                        style: TextStyle(color: ColorResource.primaryColor),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showTicketDialog(BuildContext context, ProfileViewModel provider) {
+    final subjectController = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Raise Support Ticket"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: subjectController,
+                decoration: const InputDecoration(labelText: "Subject"),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: descriptionController,
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: "Description"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (subjectController.text.trim().isNotEmpty && descriptionController.text.trim().isNotEmpty) {
+                  Navigator.pop(context);
+                  provider.raiseSupportTicket(context, subjectController.text.trim(), descriptionController.text.trim());
+                }
+              },
+              child: const Text("Submit"),
+            ),
+          ],
         );
       },
     );

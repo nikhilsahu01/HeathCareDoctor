@@ -40,7 +40,9 @@ class AppointmentViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       final model = await _repository.getUpcomingAppointmentsListApi();
-      _upcomingAppointments = model.data?.appointments ?? [];
+      _upcomingAppointments = (model.data?.appointments ?? [])
+          .where((e) => e.status == 'Pending' || e.status == 'Confirmed')
+          .toList();
     } catch (e) {
       debugPrint("❌ Error fetching upcoming appointments: $e");
     } finally {
@@ -88,7 +90,9 @@ class AppointmentViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       final model = await _repository.getCompletedAppointmentsListApi();
-      _completedAppointments = model.data?.appointments ?? [];
+      _completedAppointments = (model.data?.appointments ?? [])
+          .where((e) => e.status == 'Completed')
+          .toList();
     } catch (e) {
       debugPrint("❌ Error fetching completed appointments: $e");
     } finally {
@@ -103,7 +107,9 @@ class AppointmentViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       final model = await _repository.getCancelledAppointmentsListApi();
-      _cancelledAppointments = model.data?.appointments ?? [];
+      _cancelledAppointments = (model.data?.appointments ?? [])
+          .where((e) => e.status == 'Cancelled')
+          .toList();
     } catch (e) {
       debugPrint("❌ Error fetching cancelled appointments: $e");
     } finally {
