@@ -1029,7 +1029,7 @@ class _HomeScreenState extends State<HomeScreen> {
             channelName: channel,
             token: token,
             uid: uid,
-            appointmentId: appointmentId,
+            appointmentId: appointmentId, isDoctor: true,
           ),
         );
       } else if (response.statusCode == 400) {

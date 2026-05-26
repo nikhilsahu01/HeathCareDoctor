@@ -275,6 +275,7 @@ class AgoraVideoCallScreen extends StatefulWidget {
   final String token;
   final String appointmentId;
   final int uid;
+  final bool isDoctor;
 
   const AgoraVideoCallScreen({
     super.key,
@@ -282,6 +283,7 @@ class AgoraVideoCallScreen extends StatefulWidget {
     required this.token,
     required this.appointmentId,
     required this.uid,
+    required this.isDoctor
   });
 
   @override
@@ -291,6 +293,8 @@ class AgoraVideoCallScreen extends StatefulWidget {
 
 class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
   RtcEngine? _engine;
+  bool _callEnded = false;
+
 
   bool _joined = false;
   bool _muted = false;
@@ -302,6 +306,31 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
   void initState() {
     super.initState();
     _initAgora();
+  }
+
+  Future<void> _handleCallEnd() async {
+
+    if (_callEnded) return;
+
+    _callEnded = true;
+
+    await _engine?.leaveChannel();
+
+    if (!mounted) return;
+
+    // ONLY DOCTOR
+    if (widget.isDoctor) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => UploadPrescriptionScreen(
+            appointmentId: widget.appointmentId,
+          ),
+        ),
+      );
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   Future<void> _initAgora() async {
@@ -330,11 +359,24 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
           });
         },
 
-        onUserOffline: (_, uid, __) {
+
+        onUserOffline: (_, uid, __) async {
+
           setState(() {
             _remoteUids.remove(uid);
           });
+
+          // agar saamne wala user chala gaya
+          if (_remoteUids.isEmpty) {
+            await _handleCallEnd();
+          }
         },
+
+        // onUserOffline: (_, uid, __) {
+        //   setState(() {
+        //     _remoteUids.remove(uid);
+        //   });
+        // },
       ),
     );
 
@@ -448,18 +490,21 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
             heroTag: "end",
             backgroundColor: Colors.red,
             onPressed: () async {
-              await _engine?.leaveChannel();
-              if (mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UploadPrescriptionScreen(
-                      appointmentId: widget.appointmentId,
-                    ),
-                  ),
-                );
-              }
+              await _handleCallEnd();
             },
+            // onPressed: () async {
+            //   await _engine?.leaveChannel();
+            //   if (mounted) {
+            //     Navigator.pushReplacement(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => UploadPrescriptionScreen(
+            //           appointmentId: widget.appointmentId,
+            //         ),
+            //       ),
+            //     );
+            //   }
+            // },
             child: const Icon(Icons.call_end),
           ),
 

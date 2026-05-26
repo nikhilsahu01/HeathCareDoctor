@@ -235,9 +235,9 @@ class _LoginScreenState extends State<LoginScreen> {
   static const Color kSubtitleColor = Color(0xFF677294);
 
   String fullPhoneNumber = '';
-  String? countryCode = '+91';
-  String? isoCode = 'IN';
-  String? phoneNumber = '';
+  String phoneNumber = '';
+  String countryCode = '';
+  String isoCode = '';
   bool isSending = false;
 
   @override
@@ -328,43 +328,75 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: IntlPhoneField(
-
-
                             initialCountryCode: 'IN',
                             showDropdownIcon: true,
-                            showCountryFlag: true, // Switched to true for better UX
+                            showCountryFlag: true,
+                            disableLengthCheck: false,
+
+
                             dropdownIcon: const Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: kSubtitleColor
+                              Icons.keyboard_arrow_down_rounded,
+                              color: kSubtitleColor,
                             ),
+
                             style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF222B45)
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF222B45),
                             ),
+
                             dropdownTextStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
+
                             cursorColor: kPrimaryColor,
-                            keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.phone,
                             autovalidateMode: AutovalidateMode.onUserInteraction,
+
                             decoration: InputDecoration(
-                              hintText: '000 000 0000',
-                              hintStyle: TextStyle(color: kSubtitleColor.withOpacity(0.5)),
+                              hintText: 'Enter phone number',
+                              hintStyle: TextStyle(
+                                color: kSubtitleColor.withOpacity(0.5),
+                              ),
                               filled: true,
-                              fillColor: Color(0xFFF0F4FA),
+                              fillColor: const Color(0xFFF0F4FA),
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                              errorBorder: InputBorder.none,
+                              focusedErrorBorder: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
+                              ),
                               counterText: '',
                             ),
+
+                            // IMPORTANT VALIDATION
+                            validator: (phone) {
+
+                              // Empty check
+                              if (phone == null || phone.number.isEmpty) {
+                                return 'Please enter mobile number';
+                              }
+
+                              // Package built-in country validation
+                              if (!phone.isValidNumber()) {
+                                return 'Invalid mobile number';
+                              }
+
+                              return null;
+                            },
+
                             onChanged: (phone) {
                               fullPhoneNumber = phone.completeNumber;
                               phoneNumber = phone.number;
                               countryCode = phone.countryCode;
                               isoCode = phone.countryISOCode;
+
+                              debugPrint("Full Number: $fullPhoneNumber");
+                              debugPrint("ISO Code: $isoCode");
                             },
                           ),
                         ),

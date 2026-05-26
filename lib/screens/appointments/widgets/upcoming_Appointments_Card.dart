@@ -446,7 +446,7 @@ class _UpcomingAppointmentsCardState extends State<UpcomingAppointmentsCard> {
             channelName: channel,
             token: token,
             uid: uid,
-            appointmentId: appointmentId,
+            appointmentId: appointmentId, isDoctor: true,
           ),
         );
       } else {
