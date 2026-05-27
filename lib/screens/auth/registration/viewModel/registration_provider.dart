@@ -22,24 +22,12 @@ class RegistrationProvider extends ChangeNotifier {
   List<DoctorCategoryData> _categories = [];
   List<DoctorCategoryData> get categories => _categories;
 
-  List<DoctorCategoryData> _selectedCategories = [];
-  List<DoctorCategoryData> get selectedCategories => _selectedCategories;
+  DoctorCategoryData? _selectedCategory;
+  DoctorCategoryData? get selectedCategory => _selectedCategory;
 
   // -------- Symptoms State --------
   List<symptomsData> _symptoms = [];
   List<symptomsData> get symptoms => _symptoms;
-
-  // -------- Specialization State (Mock) --------
-  List<String> _specializations = [];
-  List<String> get specializations => _specializations;
-  List<String> _selectedSpecializations = [];
-  List<String> get selectedSpecializations => _selectedSpecializations;
-
-  // -------- Degree State (Mock) --------
-  List<String> _degrees = [];
-  List<String> get degrees => _degrees;
-  String? _selectedDegree;
-  String? get selectedDegree => _selectedDegree;
 
   // expose just names for dropdown
   List<String> get symptomsList => _symptoms.map((s) => s.name ?? "").toList();
@@ -87,49 +75,9 @@ class RegistrationProvider extends ChangeNotifier {
     }
   }
 
-  // -------- Fetch Specializations (Mock) --------
-  Future<void> fetchSpecializationsApi() async {
-    _isLoading = true;
-    notifyListeners();
-    try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      _specializations = ["Cardiology", "Neurology", "Orthopedics", "Pediatrics"];
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  // -------- Fetch Degrees (Mock) --------
-  Future<void> fetchDegreesApi() async {
-    _isLoading = true;
-    notifyListeners();
-    try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      _degrees = ["MBBS", "MD", "DO", "PhD"];
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  // -------- Select Categories --------
-  void toggleCategory(DoctorCategoryData category) {
-    if (_selectedCategories.contains(category)) {
-      _selectedCategories.remove(category);
-    } else {
-      _selectedCategories.add(category);
-    }
-    notifyListeners();
-  }
-
-  void setSelectedSpecializations(List<String> specs) {
-    _selectedSpecializations = specs;
-    notifyListeners();
-  }
-
-  void setSelectedDegree(String? degree) {
-    _selectedDegree = degree;
+  // -------- Select Category --------
+  void selectCategory(DoctorCategoryData category) {
+    _selectedCategory = category;
     notifyListeners();
   }
 
@@ -166,9 +114,9 @@ class RegistrationProvider extends ChangeNotifier {
       return;
     }
 
-    if (_selectedCategories.isEmpty) {
+    if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one category')),
+        const SnackBar(content: Text('Please select a category')),
       );
       return;
     }
@@ -187,8 +135,8 @@ class RegistrationProvider extends ChangeNotifier {
             : gender == 'Female'
             ? 'female'
             : 'other',
-        category: _selectedCategories.map((c) => c.sId ?? "").join(","), // modified
-        qualification: qualification, // Using degree instead if needed, but left as is
+        category: _selectedCategory!.sId ?? "",
+        qualification: qualification,
         type: type,
         address: address,
         department: departments,

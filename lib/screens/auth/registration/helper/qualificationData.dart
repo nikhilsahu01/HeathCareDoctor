@@ -227,38 +227,22 @@ class _QualificationSelectorState extends State<QualificationSelector> {
 
         // Level 1: MBBS or BDS
         DropdownButtonFormField<String>(
-          value: baseQualifications.contains(selectedBase)
-              ? selectedBase
-              : null,
-
+          value: selectedBase,
           decoration: const InputDecoration(
             fillColor: Colors.white,
             labelText: "Basic Qualification *",
             border: OutlineInputBorder(),
           ),
-
-          items: baseQualifications
-              .toSet() // removes duplicate values
-              .map(
-                (e) => DropdownMenuItem<String>(
-              value: e,
-              child: Text(e),
-            ),
-          )
-              .toList(),
-
+          items: baseQualifications.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           onChanged: (val) {
             setState(() {
               selectedBase = val;
               selectedPg = null;
               selectedSuper = null;
             });
-
             _notifyChange();
           },
-
-          validator: (val) =>
-          val == null ? 'Basic qualification is required' : null,
+          validator: (val) => val == null ? 'Basic qualification is required' : null,
         ),
 
         const SizedBox(height: 15),

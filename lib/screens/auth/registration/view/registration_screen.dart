@@ -89,8 +89,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       final provider = Provider.of<RegistrationProvider>(context, listen: false);
       provider.fetchDoctorCategories();
       provider.fetchSymptomsApi();
-      provider.fetchSpecializationsApi(); // MOCK
-      provider.fetchDegreesApi(); // MOCK
     });
   }
 
@@ -186,7 +184,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     validator: validateName),
                 const SizedBox(height: 15),
 
-                /// Category dropdown (Multi-select)
+                /// Category dropdown
                 Consumer<RegistrationProvider>(
                   builder: (context, provider, _) {
                     if (provider.isLoading && provider.categories.isEmpty) {
@@ -195,22 +193,31 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             color: ColorResource.primaryColor,
                           ));
                     }
-                    return CustomMultiSelectDropdown(
-                      label: "Select Categories",
-                      items: provider.categories.map((c) => c.name ?? "").toList(),
-                      selectedItems: provider.selectedCategories.map((c) => c.name ?? "").toList(),
-                      onChanged: (selectedNames) {
-                        // We need to sync selected categories back to the provider. 
-                        // But CustomMultiSelectDropdown doesn't let us easily toggle one by one, 
-                        // so we can clear and re-add or just manage it locally and push.
-                        provider.selectedCategories.clear();
-                        for (var name in selectedNames) {
-                          final match = provider.categories.where((c) => c.name == name);
-                          if (match.isNotEmpty) {
-                            provider.selectedCategories.add(match.first);
-                          }
+                    return DropdownButtonFormField<String>(
+
+
+
+                      value: provider.selectedCategory?.sId,
+                      decoration: const InputDecoration(
+                        fillColor: Colors.white,
+                        labelText: "Select Categories ",
+                        border: OutlineInputBorder(),
+                      ),
+                      items: provider.categories.map((cat) {
+                        return DropdownMenuItem(
+                          value: cat.sId,
+                          child: Text(cat.name ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          final selected = provider.categories
+                              .firstWhere((cat) => cat.sId == val);
+                          provider.selectCategory(selected);
                         }
                       },
+                      validator: (val) =>
+                      val == null ? 'Please select a category' : null,
                     );
                   },
                 ),
@@ -218,54 +225,56 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 /// Mobile
                 Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.only(left: 12),
-                  clipBehavior: Clip.antiAlias,
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0F4FA),
-                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: ColorResource.primaryColor),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: IntlPhoneField(
-                      initialValue: widget.mobAvailable == true ? widget.mobileNumber : null,
-                      initialCountryCode: widget.mobAvailable == true ? (widget.isoCode ?? 'IN') : 'IN',
-                      readOnly: widget.mobAvailable ?? false,
-                      enabled: !(widget.mobAvailable ?? false),
-                      showDropdownIcon: true,
-                      showCountryFlag: true, // Switched to true for better UX
-                      dropdownIcon: const Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: Color(0xFF677294),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF222B45),
-                      ),
-                      dropdownTextStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      cursorColor: const Color(0xFF419CAB),
-                      keyboardType: TextInputType.number,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                        hintText: 'Mobile Number',
-                        hintStyle: TextStyle(color: const Color(0xFF677294).withOpacity(0.5)),
-                        filled: true,
-                        fillColor: const Color(0xFFF0F4FA),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                        counterText: '',
-                      ),
-                      onChanged: (phone) {
-                        mobController.text = phone.number;
-                        countryCodeController.text = phone.countryCode;
-                      },
+                  child: IntlPhoneField(
+                    initialValue:
+                    widget.mobAvailable == true ? widget.mobileNumber : null,
+                    initialCountryCode:
+                    widget.mobAvailable == true ? widget.isoCode : 'IN',
+                   readOnly: widget.mobAvailable ?? false,
+                    enabled: !(widget.mobAvailable ?? false),
+                    showDropdownIcon: true,
+                    showCountryFlag: false,
+                    dropdownIcon: const Icon(Icons.arrow_drop_down,
+                        color: ColorResource.primaryColor),
+                    style: const TextStyle(color: Colors.black),
+                    dropdownTextStyle: const TextStyle(color: Colors.black),
+                    cursorColor: ColorResource.primaryColor,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      fillColor: Colors.white,
+                      hintText: 'Mobile Number',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+
+                      focusedBorder: InputBorder.none,
+                      contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+
+
+
+                      counterText: '',
                     ),
+                    // autovalidateMode: AutovalidateMode.onUserInteraction,
+                    // disableLengthCheck: false,
+                    validator: (value) {
+                      if (value == null || value.number.isEmpty) {
+                        return 'Mobile number is required';
+                      }
+                      if (value.number.length < 6) {
+                        return 'Enter a valid number';
+                      }
+                      return null;
+                    },
+                    onChanged: (phone) {
+                      mobController.text = phone.number;
+                      countryCodeController.text = phone.countryCode;
+                    },
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -296,29 +305,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 //   },
                 // ),
                 const SizedBox(height: 15),
-                /// Degree Dropdown (Mock)
-                Consumer<RegistrationProvider>(
-                  builder: (context, provider, _) {
-                    return DropdownButtonFormField<String>(
-                      value: provider.selectedDegree,
-                      decoration: const InputDecoration(
-                        fillColor: Colors.white,
-                        labelText: "Select Degree",
-                        border: OutlineInputBorder(),
-                      ),
-                      items: provider.degrees.map((deg) {
-                        return DropdownMenuItem(
-                          value: deg,
-                          child: Text(deg),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        provider.setSelectedDegree(val);
-                        if (val != null) qualificationController.text = val;
-                      },
-                      validator: (val) =>
-                      val == null ? 'Please select a degree' : null,
-                    );
+                QualificationSelector(
+                  onQualificationChanged: (value) {
+                    qualificationController.text = value;
                   },
                 ),
                 const SizedBox(height: 15),
@@ -473,21 +462,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             .map((s) => s.sId ?? "")
                             .toList();
                         print("Selected Symptom IDs: $selectedSymptomIds");
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 15),
-
-                /// Specializations dropdown
-                Consumer<RegistrationProvider>(
-                  builder: (context, provider, _) {
-                    return CustomMultiSelectDropdown(
-                      label: "Specializations (optional)",
-                      items: provider.specializations,
-                      selectedItems: provider.selectedSpecializations,
-                      onChanged: (selectedList) {
-                        provider.setSelectedSpecializations(selectedList);
                       },
                     );
                   },
