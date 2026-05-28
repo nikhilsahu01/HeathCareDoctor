@@ -33,6 +33,7 @@ class ProfileData {
   String? gender;
   String? address;
   List<String>? department;
+  List<Category>? categories; // Added categories
   List<String>? symptoms;
   String? qualification;
   String? yearOfExp;
@@ -77,6 +78,8 @@ class ProfileData {
   String? email;              // New field
   String? licenseAuthority;   // New field
   String? specialization;    // New field
+  String? countryRegistration; // New field
+  var registrationYear;       // New field
 
   ProfileData({
     this.otp,
@@ -131,6 +134,8 @@ class ProfileData {
     this.email,              // New field
     this.licenseAuthority,   // New field
     this.specialization,     // New field
+    this.countryRegistration,
+    this.registrationYear,
   });
 
   ProfileData.fromJson(Map<String, dynamic> json) {
@@ -146,7 +151,17 @@ class ProfileData {
     gender = json['gender'];
     address = json['address'];
     department = json['department']?.cast<String>();
-    symptoms = json['symptoms']?.cast<String>();
+    if (json['categories'] != null) {
+      categories = [];
+      json['categories'].forEach((v) {
+        categories!.add(Category.fromJson(v));
+      });
+    }
+    
+    if (json['symptoms'] != null) {
+      symptoms = json['symptoms'].cast<String>();
+    }
+    
     qualification = json['qualification'];
     yearOfExp = json['yearOfExp'];
     licOrRegNumber = json['licOrRegNumber'];
@@ -197,6 +212,8 @@ class ProfileData {
     email = json['email'];                     // New field
     licenseAuthority = json['licenseAuthority']; // New field
     specialization = json['specialization'];  // New field
+    countryRegistration = json['countryRegistration'];
+    registrationYear = json['registrationYear'];
   }
 
   Map<String, dynamic> toJson() {
@@ -213,7 +230,12 @@ class ProfileData {
     data['gender'] = gender;
     data['address'] = address;
     data['department'] = department;
-    data['symptoms'] = symptoms;
+    if (categories != null) {
+      data['categories'] = categories!.map((v) => v.toJson()).toList();
+    }
+    if (symptoms != null) {
+      data['symptoms'] = symptoms;
+    }
     data['qualification'] = qualification;
     data['yearOfExp'] = yearOfExp;
     data['licOrRegNumber'] = licOrRegNumber;
@@ -259,6 +281,8 @@ class ProfileData {
     data['email'] = email;                     // New field
     data['licenseAuthority'] = licenseAuthority; // New field
     data['specialization'] = specialization;  // New field
+    data['countryRegistration'] = countryRegistration;
+    data['registrationYear'] = registrationYear;
 
     return data;
   }
@@ -287,13 +311,38 @@ class SelectDay {
   String? day;
   bool? available;
   String? sId;
+  String? openingTime;
+  String? closingTime;
+  String? sessionTime;
+  String? breakTime;
+  String? bufferTime;
+  String? lunchStart;
+  String? lunchEnd;
 
-  SelectDay({this.day, this.available, this.sId});
+  SelectDay({
+    this.day, 
+    this.available, 
+    this.sId,
+    this.openingTime,
+    this.closingTime,
+    this.sessionTime,
+    this.breakTime,
+    this.bufferTime,
+    this.lunchStart,
+    this.lunchEnd,
+  });
 
   SelectDay.fromJson(Map<String, dynamic> json) {
     day = json['day'];
     available = json['available'];
     sId = json['_id'];
+    openingTime = json['openingTime'];
+    closingTime = json['closingTime'];
+    sessionTime = json['sessionTime'];
+    breakTime = json['breakTime'];
+    bufferTime = json['bufferTime'];
+    lunchStart = json['lunchStart'];
+    lunchEnd = json['lunchEnd'];
   }
 
   Map<String, dynamic> toJson() {
@@ -301,6 +350,13 @@ class SelectDay {
     data['day'] = day;
     data['available'] = available;
     data['_id'] = sId;
+    data['openingTime'] = openingTime;
+    data['closingTime'] = closingTime;
+    data['sessionTime'] = sessionTime;
+    data['breakTime'] = breakTime;
+    data['bufferTime'] = bufferTime;
+    data['lunchStart'] = lunchStart;
+    data['lunchEnd'] = lunchEnd;
     return data;
   }
 }

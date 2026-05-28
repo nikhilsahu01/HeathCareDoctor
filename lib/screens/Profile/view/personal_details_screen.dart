@@ -67,28 +67,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (provider.approvalStatus == "pending")
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.orange),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.info_outline, color: Colors.orange),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                "Your profile changes are pending admin approval.",
-                                style: TextStyle(color: Colors.orange.shade900),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    // removed pending approval banner
                     GestureDetector(
                       onTap: () async {
                         final pickedImage = await HelperMethods.showImagePickerOptions(context);

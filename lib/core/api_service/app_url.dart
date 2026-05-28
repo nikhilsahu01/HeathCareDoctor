@@ -4,8 +4,8 @@ class AppUrl {
 
   //live
  // static const String baseUrl = 'https://94np5jjf-5003.inc1.devtunnels.ms';
-  static const String baseUrl = 'http://192.168.1.22:9003';
-  // static const String baseUrl = 'https://admin.olcure.com';
+  // static const String baseUrl = 'http://192.168.1.22:9003';
+  static const String baseUrl = 'https://admin.olcure.com';
   static const String getOtp = '$baseUrl/api/vendor/auth/sendOtp';
   static const String verifyOtp = '$baseUrl/api/vendor/auth/verifyOtp';
   static const String signUp = '$baseUrl/api/vendor/auth/register';

@@ -1,75 +1,76 @@
 import 'package:flutter/material.dart';
-
-class NotificationModel {
-  final String id;
-  final String title;
-  final String body;
-  final String date;
-  bool isRead;
-
-  NotificationModel({
-    required this.id,
-    required this.title,
-    required this.body,
-    required this.date,
-    this.isRead = false,
-  });
-}
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:doctors/core/api_service/app_url.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../model/notification_model.dart';
 
 class NotificationViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  List<NotificationModel> _notifications = [];
-  List<NotificationModel> get notifications => _notifications;
+  NotificationModel? _notificationModel;
+  NotificationModel? get notificationModel => _notificationModel;
+
+  List<NotificationData> get notifications =>
+      _notificationModel?.data?.list ?? [];
+  int get unreadCount => _notificationModel?.data?.unreadCount ?? 0;
 
   Future<void> fetchNotifications() async {
     _isLoading = true;
     notifyListeners();
 
-    // Mock API call
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token == null) return;
 
-    _notifications = [
-      NotificationModel(
-        id: "1",
-        title: "Appointment Reminder",
-        body: "Your appointment with Marcus Chen starts in 15 minutes.",
-        date: "Today, 10:15 AM",
-        isRead: false,
-      ),
-      NotificationModel(
-        id: "2",
-        title: "Profile Approved",
-        body: "Your profile has been successfully approved by the admin.",
-        date: "Yesterday, 2:30 PM",
-        isRead: true,
-      ),
-      NotificationModel(
-        id: "3",
-        title: "New Booking",
-        body: "A new appointment has been booked for tomorrow.",
-        date: "Yesterday, 9:00 AM",
-        isRead: true,
-      ),
-    ];
+      final response = await http.get(
+        Uri.parse(AppUrl.notifications),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        _notificationModel = NotificationModel.fromJson(jsonResponse);
+      } else {
+        print("Failed to fetch notifications: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error fetching notifications: $e");
+    }
 
     _isLoading = false;
     notifyListeners();
   }
 
-  void markAsRead(String id) {
-    final index = _notifications.indexWhere((n) => n.id == id);
-    if (index != -1) {
-      _notifications[index].isRead = true;
-      notifyListeners();
+  Future<void> markAsRead(String id) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token == null) return;
+
+      final response = await http.patch(
+        Uri.parse('${AppUrl.notifications}/read/$id'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final index = notifications.indexWhere((n) => n.sId == id);
+        if (index != -1) {
+          notifications[index].isRead = true;
+          _notificationModel?.data?.unreadCount =
+              (_notificationModel?.data?.unreadCount ?? 1) - 1;
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      print("Error marking notification read: $e");
     }
   }
 
-  void markAllAsRead() {
-    for (var n in _notifications) {
-      n.isRead = true;
-    }
-    notifyListeners();
+  Future<void> markAllAsRead() async {
+    // Currently, backend might not have a markAllAsRead endpoint
+    // If it does, we can implement it here.
   }
 }

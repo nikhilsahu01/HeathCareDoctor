@@ -160,14 +160,21 @@ import '../../patients/view/patients_Screen.dart';
 import 'home_screen.dart';
 
 class BottomNavController extends StatefulWidget {
-  const BottomNavController({super.key});
+  final int initialIndex;
+  const BottomNavController({super.key, this.initialIndex = 0});
 
   @override
   BottomNavControllerState createState() => BottomNavControllerState();
 }
 
 class BottomNavControllerState extends State<BottomNavController> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   // Modern Medical Palette
   static const Color primaryColor = Color(0xFF64B3BA); // Professional Medical Green/Teal

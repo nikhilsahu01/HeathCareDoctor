@@ -40,8 +40,68 @@ class AppointmentViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       final model = await _repository.getUpcomingAppointmentsListApi();
+      final now = DateTime.now();
       _upcomingAppointments = (model.data?.appointments ?? [])
-          .where((e) => e.status == 'Pending' || e.status == 'Confirmed')
+          .where((e) {
+            if (e.status != 'Pending' && e.status != 'Confirmed') return false;
+            try {
+              // Format: e.appointmentDate is likely a date string, e.timeSlot like "10:30" or "10:30 AM"
+              final dateString = e.appointmentDate ?? '';
+              final timeString = e.timeSlot ?? '';
+              if (dateString.isEmpty || timeString.isEmpty) return true; // keep if invalid data to avoid missing data
+
+              // Attempt to parse date (assuming YYYY-MM-DD or similar standard format from DB)
+              DateTime? apptDate;
+              try {
+                apptDate = DateTime.parse(dateString);
+              } catch (_) {
+                // If parsing fails, just keep it
+                return true;
+              }
+              
+              // Simplistic time check: we'll check if the day is in the past
+              final apptDay = DateTime(apptDate.year, apptDate.month, apptDate.day);
+              final todayDay = DateTime(now.year, now.month, now.day);
+              
+              if (apptDay.isBefore(todayDay)) return false; // Passed day
+              
+              // If it's today, check time roughly (assuming format like "HH:MM" or "HH:MM AM/PM")
+              if (apptDay.isAtSameMomentAs(todayDay)) {
+                 // Try to parse time
+                 // This is a rough check. If timeSlot is "19:04 - 19:34", we take "19:04"
+                 final timePart = timeString.split(' - ').first.trim();
+                 // Time parsing is tricky without knowing format. Assuming HH:MM
+                 int hour = 0;
+                 int min = 0;
+                 if (timePart.contains(RegExp(r'[aA][mM]|[pP][mM]'))) {
+                    // AM/PM format
+                    final isPm = timePart.toLowerCase().contains('pm');
+                    final cleanTime = timePart.replaceAll(RegExp(r'[a-zA-Z\s]'), '');
+                    final parts = cleanTime.split(':');
+                    if (parts.length == 2) {
+                       hour = int.tryParse(parts[0]) ?? 0;
+                       min = int.tryParse(parts[1]) ?? 0;
+                       if (isPm && hour < 12) hour += 12;
+                       if (!isPm && hour == 12) hour = 0;
+                    }
+                 } else {
+                    // 24hr format
+                    final parts = timePart.split(':');
+                    if (parts.length == 2) {
+                       hour = int.tryParse(parts[0]) ?? 0;
+                       min = int.tryParse(parts[1]) ?? 0;
+                    }
+                 }
+                 final apptTime = DateTime(now.year, now.month, now.day, hour, min);
+                 // Allow a small grace period, e.g., 60 minutes after the start time
+                 if (apptTime.add(const Duration(minutes: 60)).isBefore(now)) return false; 
+              }
+              
+              return true;
+            } catch (_) {
+              return true; // keep on any error
+            }
+          })
           .toList();
     } catch (e) {
       debugPrint("❌ Error fetching upcoming appointments: $e");
@@ -81,6 +141,21 @@ class AppointmentViewModel extends ChangeNotifier {
     } finally {
       _isLoadingInvite = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> completeAppointment(String appointmentId) async {
+    try {
+      final success = await _repository.completeAppointmentApi(appointmentId);
+      if (success) {
+        // Refresh lists
+        fetchUpcomingAppointments();
+        fetchCompletedAppointments();
+      }
+      return success;
+    } catch (e) {
+      debugPrint("❌ Error completeAppointment: $e");
+      return false;
     }
   }
 

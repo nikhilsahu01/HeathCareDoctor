@@ -56,6 +56,20 @@ class AppointmentsRepository {
       rethrow;
     }
   }
+
+  Future<bool> completeAppointmentApi(String appointmentId) async {
+    try {
+      var data = {
+        "_id": appointmentId,
+        "status": "Completed"
+      };
+      final response = await _apiService.putApiWithToken(data, AppUrl.invite); // The route is actually for updating appointment despite the variable name AppUrl.invite.
+      print('completeAppointmentApi:$response');
+      return response['success'] == true;
+    } catch (e) {
+      rethrow;
+    }
+  }
   Future<AppointmentsListModel> getCompletedAppointmentsListApi() async {
     try {
       final response = await _apiService.getApiWithToken('${AppUrl.appointmentsList}?type=Completed');

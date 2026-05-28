@@ -9,9 +9,12 @@ import '../../../core/utils/custom_widgets/custom_inputFiled.dart';
 import '../../../core/utils/custom_widgets/custom_threeDots_indecator.dart';
 import '../../../core/utils/helper_functions/valdationFunctions.dart';
 import '../../../core/utils/theams/color_resource.dart';
+import '../../../core/utils/custom_widgets/customMultipleSelectionWithChip.dart';
 import '../../auth/registration/helper/qualificationData.dart';
 import '../../auth/registration/viewModel/registration_provider.dart';
 import '../view_model/profile_view_model.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../core/api_service/app_url.dart';
 
 class ProfessionalDetailsScreen extends StatefulWidget {
   const ProfessionalDetailsScreen({super.key});
@@ -30,6 +33,8 @@ class _ProfessionalDetailsScreenState extends State<ProfessionalDetailsScreen> {
     Future.microtask(() {
       Provider.of<ProfileViewModel>(context, listen: false).fetchProfile();
       Provider.of<RegistrationProvider>(context, listen: false).fetchQualificationTree();
+      Provider.of<RegistrationProvider>(context, listen: false).fetchDoctorCategories();
+      Provider.of<RegistrationProvider>(context, listen: false).fetchSymptomsApi();
     });
   }
 
@@ -67,48 +72,104 @@ class _ProfessionalDetailsScreenState extends State<ProfessionalDetailsScreen> {
                                 );
                               }
                             ),
-                            // CustomTextFieldProfile(
-                            //   label: "Qualification",
-                            //   controller: provider.qualificationController,
-                            //   validator: justForEmpty,
-                            // ),
                             const SizedBox(height: 15),
-                            CustomTextFieldProfile(
-                              label: "Specialization",
-                              controller: provider.specializationController,
-                              validator: justForEmpty,
-                            ),
-                            const SizedBox(height: 15),
-                            CustomTextFieldProfile(
-                              label: "Country Registration",
-                              controller:
-                                  provider.countryRegistrationController,
-                              validator: justForEmpty,
+
+                            Consumer<RegistrationProvider>(
+                              builder: (context, regProvider, _) {
+                                if (regProvider.isLoading && regProvider.categories.isEmpty) {
+                                  return const Center(child: ThreeDotsLoader(color: ColorResource.primaryColor));
+                                }
+                                return CustomMultiSelectDropdown(
+                                  label: "Select Categories (Specializations)",
+                                  items: regProvider.categories.map((cat) => cat.name ?? "").toList(),
+                                  selectedItems: provider.selectedCategoryNames,
+                                  onChanged: (selectedList) {
+                                    provider.selectedCategoryNames = selectedList;
+                                    provider.selectedCategoryIds = selectedList.map((name) {
+                                      final found = regProvider.categories.firstWhere(
+                                          (cat) => cat.name == name,
+                                          orElse: () => regProvider.categories.first // dummy
+                                      );
+                                      if (found.name == name) {
+                                        return found.sId!;
+                                      }
+                                      return name; // send custom name
+                                    }).toList();
+                                  },
+                                );
+                              },
                             ),
                             const SizedBox(height: 15),
 
+                            Consumer<RegistrationProvider>(
+                              builder: (context, regProvider, _) {
+                                List<String> displaySymptoms = provider.selectedSymptomNames.isNotEmpty 
+                                    ? provider.selectedSymptomNames 
+                                    : regProvider.symptoms
+                                        .where((s) => provider.selectedSymptomIds.contains(s.sId))
+                                        .map((s) => s.name ?? "")
+                                        .toList();
+
+                                return CustomMultiSelectDropdown(
+                                  label: "Symptoms (optional)",
+                                  items: regProvider.symptoms.map((s) => s.name ?? "").toList(),
+                                  selectedItems: displaySymptoms,
+                                  onChanged: (selectedList) {
+                                    provider.selectedSymptomNames = selectedList;
+                                    provider.selectedSymptomIds = selectedList.map((name) {
+                                      final found = regProvider.symptoms.firstWhere(
+                                          (s) => s.name == name,
+                                          orElse: () => regProvider.symptoms.first // dummy
+                                      );
+                                      if (found.name == name) {
+                                        return found.sId!;
+                                      }
+                                      return name; // send custom name
+                                    }).toList();
+                                  },
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 15),
+                            // CustomTextFieldProfile(
+                            //   label: "Specialization",
+                            //   controller: provider.specializationController,
+                            //   validator: justForEmpty,
+                            // ),
+                            // const SizedBox(height: 15),
+                            // CustomTextFieldProfile(
+                            //   label: "Country Registration",
+                            //   controller:
+                            //       provider.countryRegistrationController,
+                            //   validator: justForEmpty,
+                            // ),
+                            // const SizedBox(height: 15),
+
                             CustomTextFieldProfile(
                               label: "Medical Registration Number",
-                            //  controller: provider.registrationNumber,
-                              controller:  provider.laController,
+                              controller: provider.registrationNumber,
                               validator: justForEmpty,
                             ),
                             const SizedBox(height: 15),
                             CustomTextFieldProfile(
                               label: "Year Of Registration",
-
                               controller: provider.yearRegistrationController,
+                              keyboardType: TextInputType.number,
                               validator: justForEmpty,
+                              onChanged: (val) {
+                                int? year = int.tryParse(val ?? '');
+                                if (year != null && year > 1900 && year <= DateTime.now().year) {
+                                  provider.yoxController.text = (DateTime.now().year - year).toString();
+                                }
+                              },
                             ),
                             const SizedBox(height: 15),
 
-                            // Hierarchical Qualification Selector
                             CustomTextFieldProfile(
                               label: "Years of Experience",
                               controller: provider.yoxController,
                               validator: justForEmpty,
                               keyboardType: TextInputType.number,
-                              isReadOnly: true,
                             ),
 
                             // const SizedBox(height: 15),
@@ -151,6 +212,33 @@ class _ProfessionalDetailsScreenState extends State<ProfessionalDetailsScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 20),
+
+                                  if (provider.profileData?.data?.certificate != null) ...[
+                                    Container(
+                                      width: double.infinity,
+                                      margin: const EdgeInsets.only(bottom: 15),
+                                      child: ElevatedButton.icon(
+                                        onPressed: () async {
+                                          final url = "${AppUrl.baseUrl}/${provider.profileData!.data!.certificate!.replaceAll('\\', '/')}";
+                                          try {
+                                            await launchUrl(Uri.parse(url), mode: LaunchMode.platformDefault);
+                                          } catch (e) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Could not open document')),
+                                            );
+                                          }
+                                        },
+                                        icon: const Icon(Icons.remove_red_eye),
+                                        label: const Text("View Uploaded Document"),
+                                        style: ElevatedButton.styleFrom(
+                                          foregroundColor: Colors.white, backgroundColor: ColorResource.primaryColor,
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                        ),
+                                      ),
+                                    ),
+                                    const Center(child: Text("OR", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold))),
+                                    const SizedBox(height: 15),
+                                  ],
 
                                   // Dashed Border Upload Area (Clickable)
                                   GestureDetector(

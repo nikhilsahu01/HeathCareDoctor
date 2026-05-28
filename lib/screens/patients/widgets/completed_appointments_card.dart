@@ -125,6 +125,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/custom_widgets/custom_image_view.dart';
 import '../../../core/utils/theams/color_resource.dart';
 import '../model/patients_model.dart';
@@ -252,8 +253,21 @@ class CompletedAppointmentCard extends StatelessWidget {
                 color: const Color(0xFFF2F5F9),
                 borderRadius: BorderRadius.circular(14),
                 child: InkWell(
-                  onTap: () {
-                    // Logic for call
+                  onTap: () async {
+                    if (model.userMobile != null && model.userMobile!.isNotEmpty) {
+                      final Uri url = Uri.parse('tel:${model.userMobile}');
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Could not launch phone dialer')),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Phone number not available')),
+                      );
+                    }
                   },
                   borderRadius: BorderRadius.circular(14),
                   child: const Padding(
@@ -276,7 +290,24 @@ class CompletedAppointmentCard extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (model.prescriptionFiles != null && model.prescriptionFiles!.isNotEmpty) {
+                      final urlString = model.prescriptionFiles!.first;
+                      // Ensure it's a valid url
+                      final Uri url = Uri.parse(urlString.startsWith('http') ? urlString : 'http://10.0.2.2:3000/$urlString'); // Or whatever the base URL is
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Could not open report')),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('No report available for this appointment')),
+                      );
+                    }
+                  },
                   style: OutlinedButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     side: BorderSide(color: Colors.grey.shade200),

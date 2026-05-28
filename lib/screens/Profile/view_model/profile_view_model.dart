@@ -29,7 +29,6 @@ class ProfileViewModel extends ChangeNotifier {
   final dobController = TextEditingController();
   final genderController = TextEditingController();
   final emailController = TextEditingController();
-  final languagesController = TextEditingController();
   final specializationController = TextEditingController();
   final countryRegistrationController = TextEditingController();
   final yearRegistrationController = TextEditingController();
@@ -57,16 +56,30 @@ class ProfileViewModel extends ChangeNotifier {
 
   bool inClinicAvailable = false;
   bool videoConsultAvailable = false;
+  
+  List<String> selectedSymptomIds = [];
+  List<String> selectedCategoryIds = [];
+  List<String> selectedSymptomNames = [];
+  List<String> selectedCategoryNames = [];
+  
+  ProfileViewModel() {
+    yearRegistrationController.addListener(() {
+      int? year = int.tryParse(yearRegistrationController.text);
+      if (year != null && year > 1900 && year <= DateTime.now().year) {
+        yoxController.text = (DateTime.now().year - year).toString();
+      }
+    });
+  }
 
   /// Days (mapped from API `selectDays`)
   List<Map<String, dynamic>> days = [
-    {"day": "Monday", "available": false},
-    {"day": "Tuesday", "available": false},
-    {"day": "Wednesday", "available": false},
-    {"day": "Thursday", "available": false},
-    {"day": "Friday", "available": false},
-    {"day": "Saturday", "available": false},
-    {"day": "Sunday", "available": false},
+    {"day": "Monday", "available": false, "openingTime": "09:00 AM", "closingTime": "06:00 PM", "sessionTime": "30", "breakTime": "5", "bufferTime": "0", "lunchStart": "01:00 PM", "lunchEnd": "02:00 PM"},
+    {"day": "Tuesday", "available": false, "openingTime": "09:00 AM", "closingTime": "06:00 PM", "sessionTime": "30", "breakTime": "5", "bufferTime": "0", "lunchStart": "01:00 PM", "lunchEnd": "02:00 PM"},
+    {"day": "Wednesday", "available": false, "openingTime": "09:00 AM", "closingTime": "06:00 PM", "sessionTime": "30", "breakTime": "5", "bufferTime": "0", "lunchStart": "01:00 PM", "lunchEnd": "02:00 PM"},
+    {"day": "Thursday", "available": false, "openingTime": "09:00 AM", "closingTime": "06:00 PM", "sessionTime": "30", "breakTime": "5", "bufferTime": "0", "lunchStart": "01:00 PM", "lunchEnd": "02:00 PM"},
+    {"day": "Friday", "available": false, "openingTime": "09:00 AM", "closingTime": "06:00 PM", "sessionTime": "30", "breakTime": "5", "bufferTime": "0", "lunchStart": "01:00 PM", "lunchEnd": "02:00 PM"},
+    {"day": "Saturday", "available": false, "openingTime": "09:00 AM", "closingTime": "06:00 PM", "sessionTime": "30", "breakTime": "5", "bufferTime": "0", "lunchStart": "01:00 PM", "lunchEnd": "02:00 PM"},
+    {"day": "Sunday", "available": false, "openingTime": "09:00 AM", "closingTime": "06:00 PM", "sessionTime": "30", "breakTime": "5", "bufferTime": "0", "lunchStart": "01:00 PM", "lunchEnd": "02:00 PM"},
   ];
 
     void setProfileImage(File file) {
@@ -106,7 +119,15 @@ class ProfileViewModel extends ChangeNotifier {
         dobController.text = data.dob ?? '';
         genderController.text = data.gender ?? '';
         emailController.text = data.email ?? '';
-        languagesController.text = data.symptoms?.join(", ") ?? '';
+
+        if (data.categories != null) {
+          selectedCategoryIds = data.categories!.map((e) => e.sId!).toList();
+          selectedCategoryNames = data.categories!.map((e) => e.name ?? "").toList();
+        }
+        if (data.symptoms != null) {
+          selectedSymptomIds = List<String>.from(data.symptoms!);
+          selectedSymptomNames = []; // Computed in UI
+        }
 
         specializationController.text = data.specialization ?? '';
         qualificationController.text = data.qualification ?? '';
@@ -117,9 +138,14 @@ class ProfileViewModel extends ChangeNotifier {
         hospitalAddress.text = data.address ?? '';
         inClinicFee.text = data.inClinicFee ?? '0';
         videoConsultFee.text = data.videoConsultFee ?? '0';
-        cityController.text = data.city ?? '';
+        cityController.text = (data.city?.isNotEmpty == true ? data.city : data.district) ?? '';
         stateController.text = data.state ?? '';
+        countryController.text = data.country ?? '';
         pincodeController.text = data.pincode ?? '';
+        
+        countryRegistrationController.text = data.countryRegistration ?? '';
+        yearRegistrationController.text = data.registrationYear?.toString() ?? '';
+        
         inClinicAvailable = data.inClinicAvaialble ?? false;
         videoConsultAvailable = data.videoConsultAvailable ?? false;
         sessionTimeController.text = data.sessionTime?.trim() ?? '';
@@ -133,9 +159,18 @@ class ProfileViewModel extends ChangeNotifier {
         // 🔹 Map API selectDays to `days`
         if (data.selectDays != null) {
           for (var d in days) {
-            final match =
-            data.selectDays!.firstWhere((e) => e.day == d["day"], orElse: () => SelectDay(day: d["day"], available: false));
+            final match = data.selectDays!.firstWhere(
+              (e) => e.day == d["day"], 
+              orElse: () => SelectDay(day: d["day"], available: false)
+            );
             d["available"] = match.available ?? false;
+            d["openingTime"] = match.openingTime ?? "09:00 AM";
+            d["closingTime"] = match.closingTime ?? "06:00 PM";
+            d["sessionTime"] = match.sessionTime ?? "30";
+            d["breakTime"] = match.breakTime ?? "5";
+            d["bufferTime"] = match.bufferTime ?? "0";
+            d["lunchStart"] = match.lunchStart ?? "01:00 PM";
+            d["lunchEnd"] = match.lunchEnd ?? "02:00 PM";
           }
         }
       }
@@ -212,6 +247,13 @@ class ProfileViewModel extends ChangeNotifier {
           .map((d) => {
         "day": d["day"],
         "available": d["available"],
+        "openingTime": d["openingTime"],
+        "closingTime": d["closingTime"],
+        "sessionTime": d["sessionTime"],
+        "breakTime": d["breakTime"],
+        "bufferTime": d["bufferTime"],
+        "lunchStart": d["lunchStart"],
+        "lunchEnd": d["lunchEnd"],
       })
           .toList();
 
@@ -221,7 +263,6 @@ class ProfileViewModel extends ChangeNotifier {
         "dob": dobController.text.trim(),
         "gender": genderController.text.toLowerCase().trim(),
         "email": emailController.text.trim(),
-        "languages": languagesController.text.trim(),
         "specialization": specializationController.text.trim(),
         "qualification": qualificationController.text.trim(),
         "yearOfExp": yoxController.text.trim(),
@@ -230,6 +271,9 @@ class ProfileViewModel extends ChangeNotifier {
         "address": hospitalAddress.text.trim(),
         "city": cityController.text.trim(),
         "state": stateController.text.trim(),
+        "country": countryController.text.trim(),
+        "countryRegistration": countryRegistrationController.text.trim(),
+        "registrationYear": yearRegistrationController.text.trim(),
         "videoConsultFee": videoConsultFee.text.trim(),
         "inClinicFee": inClinicFee.text.trim(),
         "pincode": pincodeController.text.trim(),
@@ -245,18 +289,30 @@ class ProfileViewModel extends ChangeNotifier {
         "bufferTime": bufferTimeController.text.trim(), // new field
       };
 
+      if (selectedCategoryIds.isNotEmpty) {
+        for (int i = 0; i < selectedCategoryIds.length; i++) {
+          fields['categories[$i]'] = selectedCategoryIds[i];
+        }
+      }
+
+      if (selectedSymptomIds.isNotEmpty) {
+        for (int i = 0; i < selectedSymptomIds.length; i++) {
+          fields['symptoms[$i]'] = selectedSymptomIds[i];
+        }
+      }
+
       final files = <String, File>{};
       if (profileFile != null) files["profileImage"] = profileFile!;
       if (certificateFile != null) files["certificate"] = certificateFile!;
 
       profileDetails = await _repo.updateProfileApi(fields: fields, files: files);
       
-      // MOCK: Set status to pending approval after edit
-      approvalStatus = "pending";
+      // Removing pending admin approval popup
+      approvalStatus = "approved";
       
       HelperMethods.showFloatingToast(
         context,
-        message: 'Profile changes submitted for admin approval!',
+        message: 'Profile updated successfully!',
         color: ColorResource.green,
       );
 

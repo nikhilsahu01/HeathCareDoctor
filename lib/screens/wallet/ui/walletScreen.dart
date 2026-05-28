@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../view_model/wallet_view_model.dart';
+import 'financial_records_screen.dart';
 
 class WalletScreen extends StatefulWidget {
   final bool isToday; // true = Today, false = Total
@@ -34,7 +35,9 @@ class _WalletScreenState extends State<WalletScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar:CustomAppBar(title: "Wallet"),
+      appBar: const CustomAppBar(
+        title: "Wallet",
+      ),
 
       body: Consumer<WalletViewModel>(
         builder: (context, viewModel, child) {
@@ -43,40 +46,45 @@ class _WalletScreenState extends State<WalletScreen> {
           }
 
           final data = viewModel.walletModel?.data;
-          final todayEarnings = 0; // Not returned from API explicitly unless filtered, using total
+          final todayEarnings =
+              0; // Not returned from API explicitly unless filtered, using total
           final totalEarnings = data?.totalEarned ?? 0;
           final availableBalance = data?.availableBalance ?? 0;
-          
+
           // Filter transactions for today if needed
           final now = DateTime.now();
           final allTxns = data?.transactions ?? [];
-          final displayedTxns = _isToday ? allTxns.where((tx) {
-            if (tx.date == null) return false;
-            final d = DateTime.tryParse(tx.date!);
-            return d != null && d.year == now.year && d.month == now.month && d.day == now.day;
-          }).toList() : allTxns;
+          final displayedTxns =
+              _isToday
+                  ? allTxns.where((tx) {
+                    if (tx.date == null) return false;
+                    final d = DateTime.tryParse(tx.date!);
+                    return d != null &&
+                        d.year == now.year &&
+                        d.month == now.month &&
+                        d.day == now.day;
+                  }).toList()
+                  : allTxns;
 
           return Column(
             children: [
-
               /// 🔹 Top Earning Card
               Container(
                 margin: const EdgeInsets.all(16),
                 padding: const EdgeInsets.all(20),
-                  decoration: ShapeDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment(0.48, -0.48),
-                      end: Alignment(0.52, 1.48),
-                      colors: [Color(0xFF006492), Color(0xFF2D9CDB)],
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                decoration: ShapeDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment(0.48, -0.48),
+                    end: Alignment(0.52, 1.48),
+                    colors: [Color(0xFF006492), Color(0xFF2D9CDB)],
                   ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -103,12 +111,17 @@ class _WalletScreenState extends State<WalletScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: const Color(0xFF006492),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
                         onPressed: () {
-                          _showWithdrawalDialog(context, viewModel, availableBalance.toDouble());
+                          _showWithdrawalDialog(
+                            context,
+                            viewModel,
+                            availableBalance.toDouble(),
+                          );
                         },
                         child: const Text("Withdraw"),
                       ),
@@ -121,14 +134,22 @@ class _WalletScreenState extends State<WalletScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => setState(() => _isToday = true),
-                      child: _toggleButton("Balance & Today", _isToday, primaryColor)
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isToday = true),
+                        child: _toggleButton(
+                          "Balance & Today",
+                          _isToday,
+                          primaryColor,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () => setState(() => _isToday = false),
-                      child: _toggleButton("Total", !_isToday, primaryColor)
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isToday = false),
+                        child: _toggleButton("Total", !_isToday, primaryColor),
+                      ),
                     ),
                   ],
                 ),
@@ -136,27 +157,64 @@ class _WalletScreenState extends State<WalletScreen> {
 
               const SizedBox(height: 16),
 
+              /// 🔹 Financial Records Button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FinancialRecordsScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.receipt_long),
+                  label: const Text("View Financial Records (Completed/Cancelled)"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF006492),
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Color(0xFF006492)),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
               /// 🔹 Transaction List
               Expanded(
-                child: displayedTxns.isEmpty 
-                  ? const Center(child: Text("No transactions"))
-                  : ListView.builder(
-                  itemCount: displayedTxns.length,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemBuilder: (context, index) {
-                    final tx = displayedTxns[index];
-                    return _transactionCard(primaryColor, greenColor, tx);
-                  },
-                ),
-              )
+                child:
+                    displayedTxns.isEmpty
+                        ? const Center(child: Text("No transactions"))
+                        : ListView.builder(
+                          itemCount: displayedTxns.length,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemBuilder: (context, index) {
+                            final tx = displayedTxns[index];
+                            return _transactionCard(
+                              primaryColor,
+                              greenColor,
+                              tx,
+                            );
+                          },
+                        ),
+              ),
             ],
           );
-        }
+        },
       ),
     );
   }
 
-  void _showWithdrawalDialog(BuildContext context, WalletViewModel viewModel, double maxAmount) {
+  void _showWithdrawalDialog(
+    BuildContext context,
+    WalletViewModel viewModel,
+    double maxAmount,
+  ) {
     final amountController = TextEditingController();
 
     showDialog(
@@ -211,36 +269,32 @@ class _WalletScreenState extends State<WalletScreen> {
 
   /// 🔹 Toggle Button
   Widget _toggleButton(String text, bool isActive, Color primaryColor) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: isActive
-            ? ShapeDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment(0.48, -0.48),
-            end: Alignment(0.52, 1.48),
-            colors: [
-              Color(0xFF006492),
-              Color(0xFF2D9CDB),
-            ],
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        )
-            : BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: primaryColor),
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration:
+          isActive
+              ? ShapeDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment(0.48, -0.48),
+                  end: Alignment(0.52, 1.48),
+                  colors: [Color(0xFF006492), Color(0xFF2D9CDB)],
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              )
+              : BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: primaryColor),
+              ),
 
-        child: Center(
-          child: Text(
-            text,
-            style: TextStyle(
-              color: isActive ? Colors.white : primaryColor,
-              fontWeight: FontWeight.w600,
-            ),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isActive ? Colors.white : primaryColor,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -250,7 +304,7 @@ class _WalletScreenState extends State<WalletScreen> {
   /// 🔹 Transaction Card
   Widget _transactionCard(Color primaryColor, Color greenColor, dynamic tx) {
     bool isCredit = tx.type == 'CREDIT';
-    
+
     String formattedDate = tx.date ?? "";
     if (tx.date != null) {
       final d = DateTime.tryParse(tx.date!);
@@ -270,12 +324,11 @@ class _WalletScreenState extends State<WalletScreen> {
             color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Row(
         children: [
-
           /// Icon
           Container(
             padding: const EdgeInsets.all(10),
@@ -295,18 +348,13 @@ class _WalletScreenState extends State<WalletScreen> {
               children: [
                 Text(
                   tx.description ?? "Transaction",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   formattedDate,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
-                )
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -318,7 +366,7 @@ class _WalletScreenState extends State<WalletScreen> {
               color: isCredit ? greenColor : Colors.red,
               fontWeight: FontWeight.bold,
             ),
-          )
+          ),
         ],
       ),
     );

@@ -142,6 +142,14 @@ class HelperMethods {
                 onTap: () async {
                   final ImagePicker picker = ImagePicker();
                   final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+                  if (pickedImage != null) {
+                    final bytes = await pickedImage.length();
+                    if (bytes > 2 * 1024 * 1024) {
+                      HelperMethods.showFloatingToast(bottomSheetContext, message: "File size exceeds 2MB limit.");
+                      Navigator.of(bottomSheetContext).pop(null);
+                      return;
+                    }
+                  }
                   Navigator.of(bottomSheetContext).pop(pickedImage);
                 },
               ),
@@ -151,6 +159,14 @@ class HelperMethods {
                 onTap: () async {
                   final ImagePicker picker = ImagePicker();
                   final XFile? pickedImage = await picker.pickImage(source: ImageSource.camera);
+                  if (pickedImage != null) {
+                    final bytes = await pickedImage.length();
+                    if (bytes > 2 * 1024 * 1024) {
+                      HelperMethods.showFloatingToast(bottomSheetContext, message: "File size exceeds 2MB limit.");
+                      Navigator.of(bottomSheetContext).pop(null);
+                      return;
+                    }
+                  }
                   Navigator.of(bottomSheetContext).pop(pickedImage);
                 },
               ),
