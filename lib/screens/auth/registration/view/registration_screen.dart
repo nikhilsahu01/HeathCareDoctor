@@ -39,7 +39,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
   final TextEditingController genderController = TextEditingController();
-  final TextEditingController qualificationController = TextEditingController();
+  List<String> selectedQualifications = []; // Replaced qualificationController
   final TextEditingController typeController = TextEditingController(text: "doctor");
   final TextEditingController addressController = TextEditingController();
   final TextEditingController departmentController = TextEditingController();
@@ -84,11 +84,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       mobController.text = "${widget.countryCode}${widget.mobileNumber}";
     }
 
+    // Initialize default country based on isoCode
+    final initialIso = widget.mobAvailable == true ? widget.isoCode ?? 'IN' : 'IN';
+    try {
+      final initialCountry = countries.firstWhere((c) => c.code == initialIso);
+      countryController.text = initialCountry.name;
+    } catch (e) {
+      countryController.text = 'India';
+    }
+
     // Fetch categories & symptoms when screen loads
     Future.microtask(() {
       final provider = Provider.of<RegistrationProvider>(context, listen: false);
       provider.fetchDoctorCategories();
       provider.fetchSymptomsApi();
+      provider.fetchQualificationTree();
     });
   }
 
@@ -97,7 +107,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     nameController.dispose();
     dobController.dispose();
     genderController.dispose();
-    qualificationController.dispose();
     typeController.dispose();
     addressController.dispose();
     departmentController.dispose();
@@ -184,7 +193,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     validator: validateName),
                 const SizedBox(height: 15),
 
-                /// Category dropdown
                 Consumer<RegistrationProvider>(
                   builder: (context, provider, _) {
                     if (provider.isLoading && provider.categories.isEmpty) {
@@ -193,31 +201,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             color: ColorResource.primaryColor,
                           ));
                     }
-                    return DropdownButtonFormField<String>(
-
-
-
-                      value: provider.selectedCategory?.sId,
-                      decoration: const InputDecoration(
-                        fillColor: Colors.white,
-                        labelText: "Select Categories ",
-                        border: OutlineInputBorder(),
-                      ),
-                      items: provider.categories.map((cat) {
-                        return DropdownMenuItem(
-                          value: cat.sId,
-                          child: Text(cat.name ?? ''),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          final selected = provider.categories
-                              .firstWhere((cat) => cat.sId == val);
-                          provider.selectCategory(selected);
-                        }
+                    return CustomMultiSelectDropdown(
+                      label: "Select Categories (Specializations)",
+                      items: provider.categories.map((cat) => cat.name ?? "").toList(),
+                      selectedItems: [],
+                      onChanged: (selectedList) {
+                        final selected = provider.categories
+                            .where((cat) => selectedList.contains(cat.name))
+                            .toList();
+                        provider.selectCategories(selected);
                       },
-                      validator: (val) =>
-                      val == null ? 'Please select a category' : null,
                     );
                   },
                 ),
@@ -275,6 +268,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       mobController.text = phone.number;
                       countryCodeController.text = phone.countryCode;
                     },
+                    onCountryChanged: (country) {
+                      setState(() {
+                        countryController.text = country.name;
+                      });
+                    },
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -299,16 +297,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   validator: justForEmpty,
                 ),
                 const SizedBox(height: 15),
-                // QualificationPicker(
-                //   onSelected: (value) {
-                //     qualificationController.text = value;
-                //   },
-                // ),
-                const SizedBox(height: 15),
-                QualificationSelector(
-                  onQualificationChanged: (value) {
-                    qualificationController.text = value;
-                  },
+                Consumer<RegistrationProvider>(
+                  builder: (context, provider, _) {
+                    if (provider.isLoading && provider.qualificationTree.isEmpty) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return QualificationSelector(
+                      treeNodes: provider.qualificationTree,
+                      onQualificationChanged: (values) {
+                        selectedQualifications = values;
+                      },
+                    );
+                  }
                 ),
                 const SizedBox(height: 15),
                 // CustomTextField(
@@ -349,22 +349,46 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 CustomTextField(
                   label: "Pincode",
                   controller: cityPinController,
-                  validator: justForEmpty,
+                  maxLength: 6,
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) return 'Pincode is required';
+                    if (val.trim().length != 6) return 'Pincode must be exactly 6 digits';
+                    return null;
+                  },
                   keyboardType: TextInputType.number,
                   onChanged: (val) async {
                     if (val.length == 6) {
                       final location =
                       await HelperMethods.getLocationFromPincode(val);
                       if (location != null) {
-                        setState(() {
-                          stateController.text = location["state"] ?? "";
-                          districtController.text = location["district"] ?? "";
-                          countryController.text = location["country"] ?? "";
-                        });
+                        final fetchedCountry = location["country"] ?? "";
+                        if (fetchedCountry.toLowerCase() != countryController.text.toLowerCase() && countryController.text.isNotEmpty) {
+                          HelperMethods.showFloatingToast(context,
+                              message: 'Pincode belongs to $fetchedCountry, but selected country is ${countryController.text}');
+                          setState(() {
+                            stateController.text = "";
+                            districtController.text = "";
+                          });
+                        } else {
+                          setState(() {
+                            stateController.text = location["state"] ?? "";
+                            districtController.text = location["district"] ?? "";
+                            // we do not overwrite the countryController here, it comes from phone code
+                          });
+                        }
                       } else {
                         HelperMethods.showFloatingToast(context,
                             message: 'Invalid or unknown pincode');
+                        setState(() {
+                          stateController.text = "";
+                          districtController.text = "";
+                        });
                       }
+                    } else if (val.length < 6) {
+                      setState(() {
+                        stateController.text = "";
+                        districtController.text = "";
+                      });
                     }
                   },
                 ),
@@ -499,8 +523,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 countryCodeController.text.trim(),
                             dob: dobController.text.trim(),
                             gender: genderController.text.trim(),
-                            qualification:
-                            qualificationController.text.trim(),
+                            qualification: selectedQualifications,
                             type: typeController.text,
                             address: addressController.text.trim(),
                             departments: departmentController.text

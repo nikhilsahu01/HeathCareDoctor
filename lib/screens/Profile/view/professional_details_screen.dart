@@ -10,6 +10,7 @@ import '../../../core/utils/custom_widgets/custom_threeDots_indecator.dart';
 import '../../../core/utils/helper_functions/valdationFunctions.dart';
 import '../../../core/utils/theams/color_resource.dart';
 import '../../auth/registration/helper/qualificationData.dart';
+import '../../auth/registration/viewModel/registration_provider.dart';
 import '../view_model/profile_view_model.dart';
 
 class ProfessionalDetailsScreen extends StatefulWidget {
@@ -26,10 +27,10 @@ class _ProfessionalDetailsScreenState extends State<ProfessionalDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () =>
-          Provider.of<ProfileViewModel>(context, listen: false).fetchProfile(),
-    );
+    Future.microtask(() {
+      Provider.of<ProfileViewModel>(context, listen: false).fetchProfile();
+      Provider.of<RegistrationProvider>(context, listen: false).fetchQualificationTree();
+    });
   }
 
   @override
@@ -52,13 +53,19 @@ class _ProfessionalDetailsScreenState extends State<ProfessionalDetailsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            QualificationSelector(
-                              initialValue:
-                                  provider.qualificationController.text,
-                              onQualificationChanged: (qualificationString) {
-                                provider.qualificationController.text =
-                                    qualificationString;
-                              },
+                            Consumer<RegistrationProvider>(
+                              builder: (context, regProvider, _) {
+                                return QualificationSelector(
+                                  treeNodes: regProvider.qualificationTree,
+                                  initialValues: provider.qualificationController.text.isNotEmpty
+                                      ? [provider.qualificationController.text]
+                                      : [],
+                                  onQualificationChanged: (qualificationStrings) {
+                                    provider.qualificationController.text =
+                                        qualificationStrings.join(" , ");
+                                  },
+                                );
+                              }
                             ),
                             // CustomTextFieldProfile(
                             //   label: "Qualification",

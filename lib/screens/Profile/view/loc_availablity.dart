@@ -8,7 +8,7 @@ import '../../../core/utils/custom_widgets/custom_appBar.dart';
 import '../../../core/utils/custom_widgets/custom_app_button.dart';
 import '../../../core/utils/custom_widgets/custom_inputFiled.dart';
 import '../../../core/utils/custom_widgets/custom_threeDots_indecator.dart';
-import '../../../core/utils/helper_functions/valdationFunctions.dart';
+import '../../../core/utils/helper_functions/helpers_methods.dart';
 import '../../../core/utils/theams/color_resource.dart';
 import '../view_model/profile_view_model.dart';
 
@@ -55,7 +55,10 @@ class _LocationAvailabilityScreenState extends State<LocationAvailabilityScreen>
                     CustomTextFieldProfile(
                       label: "Clinic/Hospital Address",
                       controller: provider.hospitalAddress,
-                      validator: justForEmpty,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'This field is required';
+                        return null;
+                      },
                       onTap: (){
                         provider.openMap(context);
                       },
@@ -64,14 +67,20 @@ class _LocationAvailabilityScreenState extends State<LocationAvailabilityScreen>
                     CustomTextFieldProfile(
                       label: "City",
                       controller: provider.cityController,
-                      validator: justForEmpty,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'This field is required';
+                        return null;
+                      },
                       onTap: (){   provider.openMap(context);},
                     ),
                     const SizedBox(height: 15),
                     CustomTextFieldProfile(
                       label: "State",
                       controller: provider.stateController,
-                      validator: justForEmpty,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'This field is required';
+                        return null;
+                      },
                       onTap: (){   provider.openMap(context);},
 
                     ),
@@ -84,16 +93,35 @@ class _LocationAvailabilityScreenState extends State<LocationAvailabilityScreen>
                           ? "Pincode"
                           : "Zip Code"),
                       controller: provider.pincodeController,
-                      validator: justForEmpty,
+                      maxLength: 6,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'Pincode is required';
+                        if (val.trim().length != 6) return 'Pincode must be exactly 6 digits';
+                        return null;
+                      },
                       keyboardType: TextInputType.number,
-                      onTap: () {
-                        provider.openMap(context);
+                      onChanged: (val) async {
+                        if (val != null && val.length == 6) {
+                          final location = await HelperMethods.getLocationFromPincode(val);
+                          if (location != null) {
+                            provider.stateController.text = location["state"] ?? "";
+                            provider.cityController.text = location["district"] ?? "";
+                            provider.countryController.text = location["country"] ?? "";
+                            provider.notifyListeners();
+                          } else {
+                            HelperMethods.showFloatingToast(context, message: 'Invalid or unknown pincode');
+                          }
+                        }
+                        provider.notifyListeners(); // To update label (Postal Code/Pincode/Zip Code)
                       },
                     ),     const SizedBox(height: 15),
                     CustomTextFieldProfile(
                       label: "Country",
                       controller: provider.countryController,
-                      validator: justForEmpty,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'This field is required';
+                        return null;
+                      },
                       keyboardType: TextInputType.text,
                       onTap: (){   provider.openMap(context);},
                     ),
@@ -116,7 +144,10 @@ class _LocationAvailabilityScreenState extends State<LocationAvailabilityScreen>
                       CustomTextFieldProfile(
                         label: "In-Clinic Fee",
                         controller: provider.inClinicFee,
-                        validator: justForEmpty,
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) return 'This field is required';
+                          return null;
+                        },
                         keyboardType: TextInputType.number,
                       ),
                     ],
@@ -139,7 +170,10 @@ class _LocationAvailabilityScreenState extends State<LocationAvailabilityScreen>
                       CustomTextFieldProfile(
                         label: "Video Consultation Fee",
                         controller: provider.videoConsultFee,
-                        validator: justForEmpty,
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) return 'This field is required';
+                          return null;
+                        },
                         keyboardType: TextInputType.number,
                       ),
                     ],

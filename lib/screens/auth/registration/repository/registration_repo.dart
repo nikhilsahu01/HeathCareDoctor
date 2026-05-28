@@ -4,6 +4,7 @@ import '../../../../core/api_service/app_url.dart';
 import '../../../../core/api_service/network_api_service.dart';
 import '../model/doctors_category_model.dart';
 import '../model/doctors_symtomps_categories_model.dart';
+import '../model/qualification_tree_model.dart';
 
 class RegistrationRepository {
   final _apiService = NetworkApiServices();
@@ -14,8 +15,8 @@ class RegistrationRepository {
     required String countryCode,
     required String dob,
     required String gender,
-    required String category,
-    required String qualification,
+    required List<String> category,
+    required List<String> qualification,
     required String type,
     required String address,
     required List<String> department,
@@ -40,8 +41,7 @@ class RegistrationRepository {
         "countryCode": countryCode,
         "dob": dob,
         "gender": gender,
-        "category": category,
-        "qualification": qualification,
+        // category and qualification mapped differently below
         "type": type,
         "address": address,
         "department": department.join(","),
@@ -61,6 +61,18 @@ class RegistrationRepository {
       if (symptoms != null && symptoms.isNotEmpty) {
         for (int i = 0; i < symptoms.length; i++) {
           fields['symptoms[$i]'] = symptoms[i];
+        }
+      }
+
+      if (category.isNotEmpty) {
+        for (int i = 0; i < category.length; i++) {
+          fields['category[$i]'] = category[i];
+        }
+      }
+
+      if (qualification.isNotEmpty) {
+        for (int i = 0; i < qualification.length; i++) {
+          fields['qualification[$i]'] = qualification[i];
         }
       }
 
@@ -95,6 +107,16 @@ class RegistrationRepository {
       final response = await _apiService.getApi(AppUrl.symptomsList);
       print('getSymptomsApi:$response');
       return SymptomsModel.fromJson(response);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<QualificationTreeResponse> getQualificationTreeApi() async {
+    try {
+      final response = await _apiService.getApi(AppUrl.qualificationTree);
+      print('getQualificationTreeApi:$response');
+      return QualificationTreeResponse.fromJson(response);
     } catch (e) {
       rethrow;
     }
