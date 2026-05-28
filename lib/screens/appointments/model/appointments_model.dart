@@ -77,6 +77,7 @@ class AppointmentsList {
   String? appointmentId;
   String? inviteDoctor;
   String? userName;
+  String? userMobile;
   String? patientName;
   String? patientImage;
   String? patientAge;
@@ -97,11 +98,13 @@ class AppointmentsList {
   num? appointmentFee;
   num? commissionAmount;
   num? netEarnings;
+  List<String>? prescriptionFiles;
 
   AppointmentsList(
       {this.appointmentId,
       this.inviteDoctor,
         this.userName,
+        this.userMobile,
         this.patientName,
         this.patientImage,
         this.patientAge,
@@ -121,12 +124,14 @@ class AppointmentsList {
         this.createdAt,
         this.appointmentFee,
         this.commissionAmount,
-        this.netEarnings});
+        this.netEarnings,
+        this.prescriptionFiles});
 
   AppointmentsList.fromJson(Map<String, dynamic> json) {
     appointmentId = json['appointmentId'];
     inviteDoctor = json['inviteDoctor'];
     userName = json['userName'];
+    userMobile = json['userMobile'];
     patientName = json['patientName'];
     patientImage = json['patientImage'];
     patientAge = json['patientAge'];
@@ -152,6 +157,9 @@ class AppointmentsList {
     appointmentFee = json['appointmentFee'];
     commissionAmount = json['commissionAmount'];
     netEarnings = json['netEarnings'];
+    if (json['prescriptionFiles'] != null) {
+      prescriptionFiles = List<String>.from(json['prescriptionFiles']);
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -159,6 +167,7 @@ class AppointmentsList {
     data['appointmentId'] = this.appointmentId;
     data['inviteDoctor'] = this.inviteDoctor;
     data['userName'] = this.userName;
+    data['userMobile'] = this.userMobile;
     data['patientName'] = this.patientName;
     data['patientImage'] = this.patientImage;
     data['patientAge'] = this.patientAge;
@@ -182,6 +191,9 @@ class AppointmentsList {
     data['appointmentFee'] = this.appointmentFee;
     data['commissionAmount'] = this.commissionAmount;
     data['netEarnings'] = this.netEarnings;
+    if (this.prescriptionFiles != null) {
+      data['prescriptionFiles'] = this.prescriptionFiles;
+    }
     return data;
   }
 }

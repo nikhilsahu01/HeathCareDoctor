@@ -43,29 +43,22 @@ class _AvailabilityTimingScreenState extends State<AvailabilityTimingScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
+                  // Removed Global time inputs
+                  // Day-wise ExpansionTiles
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: pro.days.length,
                     itemBuilder: (context, index) {
                       final day = pro.days[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                            color: Color(0xffE2EDEE),
-                            // color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.white)
-                          // boxShadow: const [
-                          //   BoxShadow(
-                          //     color: Color(0x22000000),
-                          //     blurRadius: 4,
-                          //   ),
-                          // ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          child: Row(
+                      final isAvailable = day["available"] as bool;
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        color: const Color(0xffE2EDEE),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        child: ExpansionTile(
+                          title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
@@ -76,9 +69,9 @@ class _AvailabilityTimingScreenState extends State<AvailabilityTimingScreen> {
                                 ),
                               ),
                               Switch(
-                                value: day["available"] as bool,
-                                activeColor: Color(0xff419FAD), // thumb color (circle)
-                                activeTrackColor: Color(0xff419FAD).withOpacity(0.4), // background
+                                value: isAvailable,
+                                activeColor: const Color(0xff419FAD),
+                                activeTrackColor: const Color(0xff419FAD).withOpacity(0.4),
                                 inactiveThumbColor: Colors.grey,
                                 inactiveTrackColor: Colors.grey.shade300,
                                 onChanged: (val) {
@@ -87,96 +80,148 @@ class _AvailabilityTimingScreenState extends State<AvailabilityTimingScreen> {
                               ),
                             ],
                           ),
+                          children: isAvailable
+                              ? [
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      children: [
+                                        // Quick Apply to All Days
+                                        if (index == 0 || true) // Show on all to allow copy from any
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child: TextButton.icon(
+                                              onPressed: () {
+                                                for (int i = 0; i < pro.days.length; i++) {
+                                                  if (i != index && pro.days[i]["available"]) {
+                                                    pro.days[i]["openingTime"] = day["openingTime"];
+                                                    pro.days[i]["closingTime"] = day["closingTime"];
+                                                    pro.days[i]["sessionTime"] = day["sessionTime"];
+                                                    pro.days[i]["breakTime"] = day["breakTime"];
+                                                    pro.days[i]["bufferTime"] = day["bufferTime"];
+                                                    pro.days[i]["lunchStart"] = day["lunchStart"];
+                                                    pro.days[i]["lunchEnd"] = day["lunchEnd"];
+                                                  }
+                                                }
+                                                // Trigger rebuild
+                                                pro.notifyListeners();
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(content: Text('Copied ${day["day"]}\'s timings to all available days.')),
+                                                );
+                                              },
+                                              icon: const Icon(Icons.copy, size: 16),
+                                              label: const Text("Apply to all available days", style: TextStyle(fontSize: 12)),
+                                            ),
+                                          ),
+                                        // Opening Time
+                                        CustomTextFieldProfile(
+                                          label: "Opening Time",
+                                          initialValue: day["openingTime"],
+                                          isReadOnly: true,
+                                          onTap: () async {
+                                            final time = await showTimePicker(
+                                              context: context,
+                                              initialTime: TimeOfDay.now(),
+                                            );
+                                            if (time != null) {
+                                              day["openingTime"] = time.format(context);
+                                              pro.notifyListeners();
+                                            }
+                                          },
+                                        ),
+                                        const SizedBox(height: 12),
+                                        // Closing Time
+                                        CustomTextFieldProfile(
+                                          label: "Closing Time",
+                                          initialValue: day["closingTime"],
+                                          isReadOnly: true,
+                                          onTap: () async {
+                                            final time = await showTimePicker(
+                                              context: context,
+                                              initialTime: TimeOfDay.now(),
+                                            );
+                                            if (time != null) {
+                                              day["closingTime"] = time.format(context);
+                                              pro.notifyListeners();
+                                            }
+                                          },
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: CustomTextFieldProfile(
+                                                label: "Session Time (m)",
+                                                initialValue: day["sessionTime"],
+                                                keyboardType: TextInputType.number,
+                                                onChanged: (val) {
+                                                  day["sessionTime"] = val;
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: CustomTextFieldProfile(
+                                                label: "Break Time (m)",
+                                                initialValue: day["breakTime"],
+                                                keyboardType: TextInputType.number,
+                                                onChanged: (val) {
+                                                  day["breakTime"] = val;
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        CustomTextFieldProfile(
+                                          label: "Buffer Time (minutes)",
+                                          initialValue: day["bufferTime"],
+                                          keyboardType: TextInputType.number,
+                                          onChanged: (val) {
+                                            day["bufferTime"] = val;
+                                          },
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: CustomTextFieldProfile(
+                                                label: "Lunch Start",
+                                                initialValue: day["lunchStart"],
+                                                isReadOnly: true,
+                                                onTap: () async {
+                                                  final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+                                                  if (time != null) {
+                                                    day["lunchStart"] = time.format(context);
+                                                    pro.notifyListeners();
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: CustomTextFieldProfile(
+                                                label: "Lunch End",
+                                                initialValue: day["lunchEnd"],
+                                                isReadOnly: true,
+                                                onTap: () async {
+                                                  final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+                                                  if (time != null) {
+                                                    day["lunchEnd"] = time.format(context);
+                                                    pro.notifyListeners();
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ]
+                              : [],
                         ),
                       );
-                    },
-                  ),
-        
-                  const SizedBox(height: 24),
-        
-                  // 🔹 Opening Time
-                  CustomTextFieldProfile(
-                    label: "Opening Time",
-                    controller: pro.openingTimeController,
-                    isReadOnly: true,
-                    onTap: () async {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                      );
-                      if (time != null) {
-                        pro.openingTimeController.text = time.format(context);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  CustomTextFieldProfile(
-                    label: "Closing Time",
-                    controller: pro.closingTimeController,
-                    isReadOnly: true,
-                    onTap: () async {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                      );
-                      if (time != null) {
-                        pro.closingTimeController.text = time.format(context);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  CustomTextFieldProfile(
-                    label: "Session Time (minutes)",
-                    controller: pro.sessionTimeController,
-                    keyboardType: TextInputType.number,
-                  ),
-                  // 🔹 Break Time (minutes)
-                  const SizedBox(height: 16),
-                  CustomTextFieldProfile(
-                    label: "Break Time (minutes)",
-                    controller: pro.breakTimeController,
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomTextFieldProfile(
-                    label: "Buffer Time (minutes)",
-                    controller: pro.bufferTimeController,
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  // 🔹 Lunch Start
-                  CustomTextFieldProfile(
-                    controller: pro.lunchStartController,
-        
-                    label: "Lunch Start Time",
-        
-                    isReadOnly: true,
-                    onTap: () async {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                      );
-                      if (time != null) {
-                        pro.lunchStartController.text = time.format(context);
-                      }
-                    },
-                  ),
-        
-                  const SizedBox(height: 16),
-        
-                  // 🔹 Lunch End
-                  CustomTextFieldProfile(
-                    label: 'Lunch End Time',
-                    controller: pro.lunchEndController,
-                    isReadOnly: true,
-                    onTap: () async {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                      );
-                      if (time != null) {
-                        pro.lunchEndController.text = time.format(context);
-                      }
                     },
                   ),
         

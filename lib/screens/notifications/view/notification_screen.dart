@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../core/utils/custom_widgets/custom_appBar.dart';
 import '../../../core/utils/custom_widgets/custom_threeDots_indecator.dart';
 import '../../../core/utils/theams/color_resource.dart';
+import '../../home/view/bottom_controller.dart';
+import '../../wallet/ui/walletScreen.dart';
 import '../view_model/notification_view_model.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -18,7 +20,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<NotificationViewModel>(context, listen: false).fetchNotifications();
+      Provider.of<NotificationViewModel>(
+        context,
+        listen: false,
+      ).fetchNotifications();
     });
   }
 
@@ -26,10 +31,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
-      appBar: const CustomAppBar(
-        title: 'Notifications',
-        isBack: true,
-      ),
+      appBar: const CustomAppBar(title: 'Notifications', isBack: true),
       body: Consumer<NotificationViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
@@ -48,7 +50,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -75,13 +80,38 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     final notification = viewModel.notifications[index];
                     return GestureDetector(
                       onTap: () {
-                        viewModel.markAsRead(notification.id);
+                        if (notification.sId != null) {
+                          viewModel.markAsRead(notification.sId!);
+                        }
+
+                        // Handle routing based on notification type
+                        if (notification.type != null) {
+                          String type = notification.type!.toLowerCase();
+                          if (type == 'appointment') {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const BottomNavController(initialIndex: 1),
+                              ),
+                            );
+                          } else if (type == 'wallet' || type == 'payment') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const WalletScreen(isToday: false),
+                              ),
+                            );
+                          }
+                        }
                       },
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: notification.isRead ? Colors.white : const Color(0xFFE8F1F6),
+                          color:
+                              (notification.isRead ?? false)
+                                  ? Colors.white
+                                  : const Color(0xFFE8F1F6),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
@@ -97,10 +127,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: ColorResource.primaryColor.withOpacity(0.1),
+                                color: ColorResource.primaryColor.withOpacity(
+                                  0.1,
+                                ),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.notifications_active, color: ColorResource.primaryColor, size: 20),
+                              child: const Icon(
+                                Icons.notifications_active,
+                                color: ColorResource.primaryColor,
+                                size: 20,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -108,27 +144,36 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    notification.title,
+                                    notification.title ?? 'Notification',
                                     style: TextStyle(
                                       fontSize: 16,
-                                      fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.bold,
+                                      fontWeight:
+                                          (notification.isRead ?? false)
+                                              ? FontWeight.w500
+                                              : FontWeight.bold,
                                       color: Colors.black87,
-                                   ),
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    notification.body,
-                                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                                    notification.message ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black54,
+                                    ),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    notification.date,
-                                    style: const TextStyle(fontSize: 12, color: Colors.black38),
+                                    notification.createdAt ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black38,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            if (!notification.isRead)
+                            if (!(notification.isRead ?? false))
                               Container(
                                 width: 10,
                                 height: 10,

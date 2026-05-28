@@ -76,28 +76,47 @@ class _CustomMultiSelectDropdownState extends State<CustomMultiSelectDropdown> {
                     // 🔹 List with search applied
                     Expanded(
                       child: SingleChildScrollView(
-                        child: filteredItems.isEmpty
-                            ? const Center(child: Text("No results found"))
-                            : Column(
-                          children: filteredItems.map((item) {
-                            final isSelected = tempSelected.contains(item);
-                            return CheckboxListTile(
-                              value: isSelected,
-                              title: Text(item),
-                              controlAffinity:
-                              ListTileControlAffinity.leading,
-                              activeColor: ColorResource.primaryColor,
-                              onChanged: (checked) {
-                                setStateDialog(() {
-                                  if (checked == true) {
-                                    tempSelected.add(item);
-                                  } else {
-                                    tempSelected.remove(item);
-                                  }
-                                });
-                              },
-                            );
-                          }).toList(),
+                        child: Column(
+                          children: [
+                            if (filteredItems.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text("No exact matches found."),
+                              ),
+                            ...filteredItems.map((item) {
+                              final isSelected = tempSelected.contains(item);
+                              return CheckboxListTile(
+                                value: isSelected,
+                                title: Text(item),
+                                controlAffinity:
+                                ListTileControlAffinity.leading,
+                                activeColor: ColorResource.primaryColor,
+                                onChanged: (checked) {
+                                  setStateDialog(() {
+                                    if (checked == true) {
+                                      tempSelected.add(item);
+                                    } else {
+                                      tempSelected.remove(item);
+                                    }
+                                  });
+                                },
+                              );
+                            }).toList(),
+                            if (searchQuery.isNotEmpty && !widget.items.map((e)=>e.toLowerCase()).contains(searchQuery.toLowerCase()))
+                              ListTile(
+                                leading: const Icon(Icons.add, color: ColorResource.primaryColor),
+                                title: Text('Add custom: "$searchQuery"'),
+                                onTap: () {
+                                  setStateDialog(() {
+                                    if (!tempSelected.contains(searchQuery)) {
+                                      tempSelected.add(searchQuery);
+                                      // We also add it to the local filteredItems temporarily or it just gets added to selected
+                                    }
+                                    searchQuery = ""; // Reset search after adding
+                                  });
+                                },
+                              ),
+                          ],
                         ),
                       ),
                     ),
@@ -147,17 +166,18 @@ class _CustomMultiSelectDropdownState extends State<CustomMultiSelectDropdown> {
       initialValue: _selected,
       validator: widget.validator,
       builder: (field) {
-        return InputDecorator(
-          decoration: InputDecoration(
-            labelText: widget.label,
-            border: const OutlineInputBorder(),
-            errorText: field.errorText,
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          ),
-          isEmpty: _selected.isEmpty,
-          child: InkWell(
-            onTap: _openMultiSelectDialog,
+        return InkWell(
+          onTap: _openMultiSelectDialog,
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: widget.label,
+              border: const OutlineInputBorder(),
+              errorText: field.errorText,
+              suffixIcon: const Icon(Icons.edit, color: Colors.grey, size: 20),
+              contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            ),
+            isEmpty: _selected.isEmpty,
             child: _selected.isEmpty
                 ? Text(
               "",

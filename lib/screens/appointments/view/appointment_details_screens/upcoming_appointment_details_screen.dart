@@ -11,6 +11,7 @@ import '../../../../core/utils/theams/color_resource.dart';
 import '../../viewModel/appointments_details_viewModel.dart';
 import '../cancel_appointments.dart';
 import '../reschedule_bottombar.dart';
+import '../../viewModel/appointments_viewModel.dart';
 
 class UpcomingAndCancelledAppointmentDetailsScreen extends StatefulWidget {
   final String appointmentId; 
@@ -177,6 +178,37 @@ class _UpcomingAndCancelledAppointmentDetailsScreenState extends State<UpcomingA
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final success = await Provider.of<AppointmentViewModel>(context, listen: false)
+                                .completeAppointment(widget.appointmentId);
+                            if (success) {
+                              HelperMethods.showFloatingToast(context, message: 'Appointment marked as Completed');
+                              Navigator.pop(context);
+                            } else {
+                              HelperMethods.showFloatingToast(context, message: 'Failed to complete appointment');
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorResource.primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "Complete Appointment",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),

@@ -377,31 +377,70 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_hasShownReminder || viewModel.upcomingAppointments.isEmpty) return;
     
     final nextAppointment = viewModel.upcomingAppointments.first;
-    // Mock logic: assume the first appointment is starting in 5 mins
-    _hasShownReminder = true;
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Appointment Reminder"),
-          content: Text("Your next appointment with ${nextAppointment.patientName ?? 'Patient'} is starting in 5 minutes."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Dismiss"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                // Can navigate to waiting room or enable join call
-                Provider.of<JoinCallNotifier>(context, listen: false).enableJoin(nextAppointment.appointmentId ?? '');
-              },
-              child: const Text("Go to Waiting Room"),
-            ),
-          ],
+    final dateString = nextAppointment.appointmentDate ?? '';
+    final timeString = nextAppointment.timeSlot ?? '';
+    if (dateString.isEmpty || timeString.isEmpty) return;
+
+    try {
+      final apptDate = DateTime.parse(dateString);
+      final timePart = timeString.split(' - ').first.trim();
+      int hour = 0;
+      int min = 0;
+      if (timePart.contains(RegExp(r'[aA][mM]|[pP][mM]'))) {
+        final isPm = timePart.toLowerCase().contains('pm');
+        final cleanTime = timePart.replaceAll(RegExp(r'[a-zA-Z\s]'), '');
+        final parts = cleanTime.split(':');
+        if (parts.length == 2) {
+          hour = int.tryParse(parts[0]) ?? 0;
+          min = int.tryParse(parts[1]) ?? 0;
+          if (isPm && hour < 12) hour += 12;
+          if (!isPm && hour == 12) hour = 0;
+        }
+      } else {
+        final parts = timePart.split(':');
+        if (parts.length == 2) {
+          hour = int.tryParse(parts[0]) ?? 0;
+          min = int.tryParse(parts[1]) ?? 0;
+        }
+      }
+      final now = DateTime.now();
+      final apptTime = DateTime(apptDate.year, apptDate.month, apptDate.day, hour, min);
+      
+      final diff = apptTime.difference(now);
+      
+      // If appointment is within the next 15 minutes or just started (up to 30 mins ago)
+      if (diff.inMinutes > -30 && diff.inMinutes <= 15) {
+        _hasShownReminder = true;
+        
+        // Enable Join automatically
+        Provider.of<JoinCallNotifier>(context, listen: false).enableJoin(nextAppointment.appointmentId ?? '');
+        
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Appointment Reminder"),
+              content: Text("Your appointment with ${nextAppointment.patientName ?? 'Patient'} is starting soon!"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Dismiss"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // The JoinCallNotifier already enabled it, they can click "Start Consultation" on the card
+                  },
+                  child: const Text("Okay"),
+                ),
+              ],
+            );
+          },
         );
-      },
-    );
+      }
+    } catch (_) {
+       // Ignore parsing errors
+    }
   }
 
   @override

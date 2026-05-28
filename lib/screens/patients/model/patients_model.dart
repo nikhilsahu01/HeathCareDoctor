@@ -67,6 +67,8 @@ class AppointmentsList {
   String? rescheduleReason;
   String? cancellReason;
   String? createdAt;
+  String? userMobile;
+  List<String>? prescriptionFiles;
 
   AppointmentsList(
       {this.appointmentId,
@@ -86,7 +88,9 @@ class AppointmentsList {
         this.rescheduleHistory,
         this.rescheduleReason,
         this.cancellReason,
-        this.createdAt});
+        this.createdAt,
+        this.userMobile,
+        this.prescriptionFiles});
 
   AppointmentsList.fromJson(Map<String, dynamic> json) {
     appointmentId = json['appointmentId'];
@@ -112,6 +116,10 @@ class AppointmentsList {
     rescheduleReason = json['rescheduleReason'];
     cancellReason = json['cancellReason'];
     createdAt = json['createdAt'];
+    userMobile = json['userMobile'];
+    if (json['prescriptionFiles'] != null) {
+      prescriptionFiles = json['prescriptionFiles'].cast<String>();
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -137,6 +145,10 @@ class AppointmentsList {
     data['rescheduleReason'] = this.rescheduleReason;
     data['cancellReason'] = this.cancellReason;
     data['createdAt'] = this.createdAt;
+    data['userMobile'] = this.userMobile;
+    if (this.prescriptionFiles != null) {
+      data['prescriptionFiles'] = this.prescriptionFiles;
+    }
     return data;
   }
 }
