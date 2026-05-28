@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import '../model/doctors_category_model.dart';
 import '../model/doctors_symtomps_categories_model.dart';
+import '../model/qualification_tree_model.dart';
 import '../repository/registration_repo.dart';
 
 class RegistrationProvider extends ChangeNotifier {
@@ -22,8 +23,12 @@ class RegistrationProvider extends ChangeNotifier {
   List<DoctorCategoryData> _categories = [];
   List<DoctorCategoryData> get categories => _categories;
 
-  DoctorCategoryData? _selectedCategory;
-  DoctorCategoryData? get selectedCategory => _selectedCategory;
+  List<DoctorCategoryData> _selectedCategories = [];
+  List<DoctorCategoryData> get selectedCategories => _selectedCategories;
+
+  // -------- Qualification Tree State --------
+  List<QualificationNode> _qualificationTree = [];
+  List<QualificationNode> get qualificationTree => _qualificationTree;
 
   // -------- Symptoms State --------
   List<symptomsData> _symptoms = [];
@@ -59,6 +64,22 @@ class RegistrationProvider extends ChangeNotifier {
     }
   }
 
+  // -------- Fetch Qualification Tree --------
+  Future<void> fetchQualificationTree() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final res = await _repository.getQualificationTreeApi();
+      _qualificationTree = res.data ?? [];
+    } catch (e) {
+      debugPrint("Error fetching qualification tree: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // -------- Fetch Symptoms --------
   Future<void> fetchSymptomsApi() async {
     try {
@@ -75,9 +96,9 @@ class RegistrationProvider extends ChangeNotifier {
     }
   }
 
-  // -------- Select Category --------
-  void selectCategory(DoctorCategoryData category) {
-    _selectedCategory = category;
+  // -------- Select Categories --------
+  void selectCategories(List<DoctorCategoryData> categories) {
+    _selectedCategories = categories;
     notifyListeners();
   }
 
@@ -88,7 +109,7 @@ class RegistrationProvider extends ChangeNotifier {
     required String countryCode,
     required String dob,
     required String gender,
-    required String qualification,
+    required List<String> qualification,
     required String type,
     required String address,
     required List<String> departments,
@@ -114,9 +135,16 @@ class RegistrationProvider extends ChangeNotifier {
       return;
     }
 
-    if (_selectedCategory == null) {
+    if (_selectedCategories.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category')),
+        const SnackBar(content: Text('Please select at least one category')),
+      );
+      return;
+    }
+
+    if (qualification == null || qualification.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select and add at least one qualification')),
       );
       return;
     }
@@ -135,7 +163,7 @@ class RegistrationProvider extends ChangeNotifier {
             : gender == 'Female'
             ? 'female'
             : 'other',
-        category: _selectedCategory!.sId ?? "",
+        category: _selectedCategories.map((c) => c.sId ?? "").toList(),
         qualification: qualification,
         type: type,
         address: address,

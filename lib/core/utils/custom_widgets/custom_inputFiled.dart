@@ -17,6 +17,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? initialValue;
   final Function(String)? onChanged;
+  final int? maxLength;
 
   const CustomTextField({
     Key? key,
@@ -32,6 +33,7 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.initialValue,
     this.onChanged, // ✅ Accept it
+    this.maxLength,
   }) : super(key: key);
 
   @override
@@ -71,6 +73,7 @@ class CustomTextField extends StatelessWidget {
           readOnly: isReadOnly,
           onTap: onTap,
           maxLines: maxLines,
+          maxLength: maxLength,
           keyboardType: keyboardType,
           decoration: _inputDecoration().copyWith(
             suffixIcon: suffixIcon,
@@ -115,6 +118,7 @@ class CustomTextFieldProfile extends StatelessWidget {
   /// ✅ New fields
   final String? selectedValue;
   final ValueChanged<String?>? onChanged;
+  final int? maxLength;
 
   const CustomTextFieldProfile({
     Key? key,
@@ -131,6 +135,7 @@ class CustomTextFieldProfile extends StatelessWidget {
     this.initialValue,
     this.selectedValue,   // ✅ Added
     this.onChanged,       // ✅ Added
+    this.maxLength,
   }) : super(key: key);
 
   @override
@@ -173,7 +178,9 @@ class CustomTextFieldProfile extends StatelessWidget {
           readOnly: isReadOnly,
           onTap: onTap,
           maxLines: maxLines,
+          maxLength: maxLength,
           keyboardType: keyboardType,
+          onChanged: onChanged, // ✅ Added missing onChanged for text field
           decoration: _inputDecoration().copyWith(
             suffixIcon: suffixIcon,
           ),
