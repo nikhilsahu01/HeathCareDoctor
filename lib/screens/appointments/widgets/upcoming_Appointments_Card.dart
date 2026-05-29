@@ -210,30 +210,20 @@ class _UpcomingAppointmentsCardState extends State<UpcomingAppointmentsCard> {
                         /// Invite hoga ye doctor  ICON
                         widget.model.inviteDoctor == null
                             ? GestureDetector(
-                              onTap: () {
+                              onTap: () async {
+                                await widget.provider.fetchDoctorList();
+
                                 TextEditingController searchController =
                                     TextEditingController();
 
                                 String? selectedMobile;
 
-                                List<Map<String, String>> doctorList = [
-                                  {
-                                    "name": "Dr. Balawant Dev - Gyne",
-                                    "mobile": "8957120272",
-                                  },
-                                  {
-                                    "name": "Dr Sanjay Singh - Gyne1",
-                                    "mobile": "8080808052",//empty
-                                  },
-                                  {
-                                    "name": "Dr. Rajeev - Gyne2",
-                                    "mobile": "9555307788",
-                                  },
-                                  {
-                                    "name": "Dr. Hariom - Gyne3",
-                                    "mobile": "9354437163",
-                                  },
-                                ];
+                                List<Map<String, String>> doctorList = widget.provider.availableDoctors.map((doc) {
+                                  return {
+                                    "name": doc["Name"]?.toString() ?? "Unknown Doctor",
+                                    "mobile": doc["mobile"]?.toString() ?? "",
+                                  };
+                                }).toList();
 
                                 List<Map<String, String>> filteredList =
                                     List.from(doctorList);
