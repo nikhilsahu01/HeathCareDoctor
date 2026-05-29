@@ -464,312 +464,94 @@ class _HomeScreenState extends State<HomeScreen> {
               return const Center(child: ThreeDotsLoader());
             }
 
-            if (appointmentVM.upcomingAppointments.isEmpty) {
-              return const Center(child: Text("No upcoming appointments"));
-            }
-
             final upcomingList = appointmentVM.upcomingAppointments;
-            final nextAppointment = upcomingList.first; // First one = Next Appointment
+            final hasUpcoming = upcomingList.isNotEmpty;
+            final nextAppointment = hasUpcoming ? upcomingList.first : null;
             final otherUpcoming = upcomingList.length > 1 ? upcomingList.sublist(1) : [];
 
             return ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
               children: [
                 // Welcome Header Card
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        'Next Appointment',
+                if (hasUpcoming)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          'Next Appointment',
+                          style: TextStyle(
+                            color: Color(0xFF171C20),
+                            fontSize: 16,
+                            fontFamily: 'Manrope',
+                            fontWeight: FontWeight.w700,
+                            height: 1.56,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+                      _buildNextAppointmentCard(context:context,model: nextAppointment! ),
+                    ],
+                  )
+                else
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(child: Text("No upcoming appointments")),
+                  ),
+
+
+
+                if (hasUpcoming && otherUpcoming.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Row(
+
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+                      Text(
+                        'Upcoming Patients',
                         style: TextStyle(
-                          color: Color(0xFF171C20),
+                          color: const Color(0xFF171C20),
                           fontSize: 16,
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w700,
-                          height: 1.56,
+                          height: 1.50,
                         ),
                       ),
-                    ),
-
-                    const SizedBox(height: 12),
-                    _buildNextAppointmentCard(context:context,model: nextAppointment ),
-
-                    // Container(
-                    //   padding: const EdgeInsets.all(18),
-                    //   decoration: ShapeDecoration(
-                    //     gradient: LinearGradient(
-                    //       begin: Alignment(0.48, -0.48),
-                    //       end: Alignment(0.52, 1.48),
-                    //       colors: [const Color(0xFF006492), const Color(0xFF2D9CDB)],
-                    //     ),
-                    //     shape: RoundedRectangleBorder(
-                    //       borderRadius: BorderRadius.circular(30),
-                    //     ),
-                    //   ),
-                    //   child: Column(
-                    //     crossAxisAlignment: CrossAxisAlignment.start,
-                    //     children: [
-                    //
-                    //       /// Top Row (Image + Info)
-                    //       Row(
-                    //         children: [
-                    //           Container(
-                    //             width: 80,
-                    //             height: 80,
-                    //             decoration: BoxDecoration(
-                    //               borderRadius: BorderRadius.circular(16),
-                    //               image:  DecorationImage(
-                    //                 image: NetworkImage("https://t4.ftcdn.net/jpg/06/10/87/07/360_F_610870738_xBnYHvfBrRFVpVkUUT3PkVc7TZdukIlx.jpg"),
-                    //                 fit: BoxFit.cover,
-                    //               ),
-                    //             ),
-                    //           ),
-                    //
-                    //           const SizedBox(width: 16),
-                    //
-                    //           Column(
-                    //             crossAxisAlignment: CrossAxisAlignment.start,
-                    //             children: [
-                    //               Container(
-                    //                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    //                 decoration: BoxDecoration(
-                    //                   color: Colors.white.withOpacity(0.2),
-                    //                   borderRadius: BorderRadius.circular(16),
-                    //                 ),
-                    //                 child: const Text(
-                    //                   'STARTING NOW',
-                    //                   style: TextStyle(
-                    //                     color: Colors.white,
-                    //                     fontSize: 10,
-                    //                     fontWeight: FontWeight.w700,
-                    //                     letterSpacing: 0.5,
-                    //                   ),
-                    //                 ),
-                    //               ),
-                    //
-                    //               const SizedBox(height: 4),
-                    //
-                    //               const Text(
-                    //                 'Sarah Jenkins',
-                    //                 style: TextStyle(
-                    //                   color: Colors.white,
-                    //                   fontSize: 20,
-                    //                   fontFamily: 'Manrope',
-                    //                   fontWeight: FontWeight.w700,
-                    //                 ),
-                    //               ),
-                    //
-                    //               const SizedBox(height: 4),
-                    //
-                    //               Text(
-                    //                 'Follow-up Session',
-                    //                 style: TextStyle(
-                    //                   color: Colors.white.withOpacity(0.8),
-                    //                   fontSize: 14,
-                    //                 ),
-                    //               ),
-                    //             ],
-                    //           ),
-                    //         ],
-                    //       ),
-                    //
-                    //       const SizedBox(height: 18),
-                    //
-                    //       /// Bottom Row (Time + Button)
-                    //       Row(
-                    //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //         children: [
-                    //
-                    //           /// Time Box
-                    //           Container(
-                    //             padding: const EdgeInsets.all(12),
-                    //             decoration: BoxDecoration(
-                    //               color: Colors.white.withOpacity(0.1),
-                    //               borderRadius: BorderRadius.circular(25),
-                    //               border: Border.all(
-                    //                 color: Colors.white.withOpacity(0.1),
-                    //               ),
-                    //             ),
-                    //             child: Row(
-                    //               children: [
-                    //                 Icon(Icons.access_time_outlined,color: Colors.white,),SizedBox(width: 8,),
-                    //                 const Text(
-                    //                   '09:00\nAM',
-                    //                   style: TextStyle(
-                    //                     color: Colors.white,
-                    //                     fontSize: 14,
-                    //                     fontWeight: FontWeight.w700,
-                    //                     height: 1.5,
-                    //                   ),
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           ),
-                    //
-                    //           /// Button
-                    //           Container(
-                    //             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    //             decoration: BoxDecoration(
-                    //               color: Colors.white,
-                    //               borderRadius: BorderRadius.circular(25),
-                    //             ),
-                    //             child: Row(
-                    //               children: [
-                    //                 Icon(Icons.video_camera_back,   color: Color(0xFF006492),),SizedBox(width: 8,),
-                    //                 const Text(
-                    //                   'Start\nConsultation',
-                    //                   textAlign: TextAlign.center,
-                    //                   style: TextStyle(
-                    //                     color: Color(0xFF006492),
-                    //                     fontSize: 14,
-                    //                     fontWeight: FontWeight.w700,
-                    //                     height: 1.5,
-                    //                   ),
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
-                  ],
-                ),
-                // Welcome Header Card End
-
-                const SizedBox(height: 10),
-                Row(
-
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-
-                  children: [
-                    Text(
-                      'Upcoming Patients',
-                      style: TextStyle(
-                        color: const Color(0xFF171C20),
-                        fontSize: 16,
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w700,
-                        height: 1.50,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: (){
-                        navPush(context: context, page: AppointmentScreen());
-                      },
-                      child: Text(
-                        'View All',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: const Color(0xFF006492),
-                          fontSize: 12,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600,
-                          height: 1.33,
+                      GestureDetector(
+                        onTap: (){
+                          navPush(context: context, page: AppointmentScreen());
+                        },
+                        child: Text(
+                          'View All',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: const Color(0xFF006492),
+                            fontSize: 12,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w600,
+                            height: 1.33,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 90,
-                  width: MediaQuery.of(context).size.width,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: otherUpcoming.length,
-                    itemBuilder: (context, index) {
-                      final appointment = otherUpcoming[index];
-                       return _buildUpcomingPatientCard(model: appointment,context: context);
-                    // return       Container(
-                    //
-                    //   //  width: 100,
-                    //   width: MediaQuery.of(context).size.width*0.75,
-                    //   margin:  const EdgeInsets.only(right: 8),
-                    //
-                    //   padding: const EdgeInsets.all(16),
-                    //   decoration: BoxDecoration(
-                    //     color: Colors.white,
-                    //     borderRadius: BorderRadius.circular(32),
-                    //     border: Border.all(color: const Color(0x26BEC7D1)),
-                    //     boxShadow: const [
-                    //       BoxShadow(
-                    //         color: Color(0x0A171C20),
-                    //         blurRadius: 24,
-                    //       ),
-                    //     ],
-                    //   ),
-                    //   child: Row(
-                    //     children: [
-                    //       /// Image
-                    //       Container(
-                    //         width: 48,
-                    //         height: 48,
-                    //         decoration: BoxDecoration(
-                    //           color: const Color(0xFFE4E8EE),
-                    //           borderRadius: BorderRadius.circular(32),
-                    //           image: const DecorationImage(
-                    //             image: NetworkImage("https://t4.ftcdn.net/jpg/06/10/87/07/360_F_610870738_xBnYHvfBrRFVpVkUUT3PkVc7TZdukIlx.jpg"),
-                    //             fit: BoxFit.cover,
-                    //           ),
-                    //         ),
-                    //       ),
-                    //
-                    //       const SizedBox(width: 12),
-                    //
-                    //       /// Name + Time
-                    //       Expanded(
-                    //         child: Column(
-                    //           crossAxisAlignment: CrossAxisAlignment.start,
-                    //           children: [
-                    //             const Text(
-                    //               'Michael Chen',
-                    //               style: TextStyle(
-                    //                 color: Color(0xFF171C20),
-                    //                 fontSize: 14,
-                    //                 fontWeight: FontWeight.w700,
-                    //               ),
-                    //             ),
-                    //
-                    //             const SizedBox(height: 2),
-                    //
-                    //             const Text(
-                    //               '10:30 AM',
-                    //               style: TextStyle(
-                    //                 color: Color(0xFF3F4850),
-                    //                 fontSize: 10,
-                    //                 fontWeight: FontWeight.w600,
-                    //               ),
-                    //             ),
-                    //           ],
-                    //         ),
-                    //       ),
-                    //
-                    //       /// Status Tag
-                    //       Container(
-                    //         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    //         decoration: BoxDecoration(
-                    //           color: const Color(0x337BF8A1),
-                    //           borderRadius: BorderRadius.circular(16),
-                    //         ),
-                    //         child: const Text(
-                    //           'In-Clinic',
-                    //           style: TextStyle(
-                    //             color: Color(0xFF006D37),
-                    //             fontSize: 10,
-                    //             fontWeight: FontWeight.w700,
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // );
-                  },),
-                ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 90,
+                    width: MediaQuery.of(context).size.width,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: otherUpcoming.length,
+                      itemBuilder: (context, index) {
+                        final appointment = otherUpcoming[index];
+                         return _buildUpcomingPatientCard(model: appointment,context: context);
+                      },),
+                  ),
+                ],
 
                 const SizedBox(height: 10),
 
@@ -872,7 +654,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(16),
                 child: SizedBox(
                   width: 80,
-                  height: 80,
                   child: model.patientImage != null && model.patientImage!.isNotEmpty
                       ? Image.network(
                           model.patientImage!.startsWith('http') 
@@ -880,9 +661,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : '${AppUrl.baseUrl}/${model.patientImage!}',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => 
-                              Image.asset("assets/icons/balawant.jpg", fit: BoxFit.cover),
+                              const Icon(Icons.person, size: 40, color: Colors.grey),
                         )
-                      : Image.asset("assets/icons/balawant.jpg", fit: BoxFit.cover),
+                      : const Icon(Icons.person, size: 40, color: Colors.grey),
                 ),
               ),
               const SizedBox(width: 16),
@@ -1000,15 +781,14 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               width: 48,
               height: 48,
-              color: const Color(0xFFE4E8EE),
               child: model.patientImage != null && model.patientImage!.isNotEmpty
                   ? Image.network(
                       model.patientImage!.startsWith('http') ? model.patientImage! : '${AppUrl.baseUrl}/${model.patientImage!}',
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => 
-                          Image.network("https://t4.ftcdn.net/jpg/06/10/87/07/360_F_610870738_xBnYHvfBrRFVpVkUUT3PkVc7TZdukIlx.jpg", fit: BoxFit.cover),
+                          const Icon(Icons.person, size: 30, color: Colors.grey),
                     )
-                  : Image.network("https://t4.ftcdn.net/jpg/06/10/87/07/360_F_610870738_xBnYHvfBrRFVpVkUUT3PkVc7TZdukIlx.jpg", fit: BoxFit.cover),
+                  : const Icon(Icons.person, size: 30, color: Colors.grey),
             ),
           ),
           const SizedBox(width: 12),

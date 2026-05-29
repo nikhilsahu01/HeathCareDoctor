@@ -11,7 +11,8 @@ import '../../core/coreServices/socket_service/join_call_provider.dart';
 import '../../core/coreServices/socket_service/socket_service.dart';
 import '../../core/utils/navigation_helper.dart';
 import '../appointments/view/upload_prescription_screen.dart';
-//
+import '../../core/api_service/app_url.dart';
+import '../../core/api_service/network_api_service.dart';
 // class AgoraVideoCallScreen extends StatefulWidget {
 //   final String channelName;
 //   final String token;
@@ -554,6 +555,15 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
             child: const Icon(Icons.call_end),
           ),
 
+          /// INVITE DOCTOR
+          if (widget.isDoctor)
+            FloatingActionButton(
+              heroTag: "invite",
+              backgroundColor: Colors.orange,
+              onPressed: _openInviteSheet,
+              child: const Icon(Icons.person_add, color: Colors.white),
+            ),
+
           /// SWITCH CAMERA
           FloatingActionButton(
             heroTag: "switch",
@@ -672,6 +682,102 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
+  void _openInviteSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(builder: (context, setSheetState) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.6,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      border: Border(bottom: BorderSide(color: Colors.grey, width: 0.2)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Invite Doctor", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: FutureBuilder(
+                      future: NetworkApiServices().postApiWithToken({"categoryid": ""}, AppUrl.commonDoctorList),
+                      builder: (context, AsyncSnapshot snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return const Center(child: Text("Error fetching doctors"));
+                        }
+                        final data = snapshot.data;
+                        final List doctors = data != null && data['data'] != null ? data['data'] : [];
+                        if (doctors.isEmpty) {
+                          return const Center(child: Text("No doctors available"));
+                        }
+
+                        return ListView.builder(
+                          itemCount: doctors.length,
+                          itemBuilder: (context, index) {
+                            final doc = doctors[index];
+                            final docId = doc['_id'];
+                            final docName = doc['Name'] ?? 'Unknown';
+                            final docDept = doc['department'] != null && doc['department'].isNotEmpty ? doc['department'][0] : 'General';
+                            final profileImage = doc['profileImage'];
+
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: profileImage != null && profileImage.toString().isNotEmpty 
+                                    ? NetworkImage(profileImage.toString()) 
+                                    : null,
+                                child: profileImage == null || profileImage.toString().isEmpty ? const Icon(Icons.person) : null,
+                              ),
+                              title: Text(docName),
+                              subtitle: Text(docDept),
+                              trailing: ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                                onPressed: () {
+                                  // Emit socket event to the other doctor
+                                  SocketService().emit("invite-doctor", {
+                                    "doctorId": docId,
+                                    "appointmentId": widget.appointmentId,
+                                    "channelName": widget.channelName,
+                                    "token": widget.token,
+                                  });
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Invite sent to $docName")),
+                                  );
+                                },
+                                child: const Text("Invite", style: TextStyle(color: Colors.white)),
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
                   ),
                 ],

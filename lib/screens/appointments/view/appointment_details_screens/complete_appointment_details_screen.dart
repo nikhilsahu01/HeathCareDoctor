@@ -276,13 +276,8 @@ class _CompletedAppointmentsDetailsScreenState
           if (model == null) {
             return const Center(child: Text("No data available."));
           }
-// ==================== Hardcoded Attachments (Replace with model later) ====================
-          final List<Map<String, String>> attachments = [
-            {"type": "image", "url": widget.profileImage, "name": "Prescription.jpg"},
-            {"type": "pdf", "url": "https://example.com/reports/lab_report.pdf", "name": "Lab_Report.pdf"},
-            {"type": "image", "url": "https://example.com/reports/scan1.jpg", "name": "MRI_Scan.jpg"},
-            // Add more as per your model
-          ];
+// ==================== Dynamic Attachments (From model) ====================
+          final List attachments = model.attachments ?? [];
           return SingleChildScrollView(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -351,9 +346,9 @@ class _CompletedAppointmentsDetailsScreenState
                       ),
                       const SizedBox(height: 14),
                       Text(
-                      "Dr. ${  model.user?.name ?? "Adrian Sterong"}",
-                        style: TextStyle(
-                          color: const Color(0xFF171C20),
+                      "Dr. ${model.user?.name ?? ""}",
+                        style: const TextStyle(
+                          color: Color(0xFF171C20),
                           fontSize: 20,
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w600,
@@ -361,7 +356,7 @@ class _CompletedAppointmentsDetailsScreenState
                         ),
                       ),
                       Text(
-                        model.category?.name ?? "Senior Neurologist • 12 Years Exp.",
+                        model.category?.name ?? "General",
                         style: TextStyle(
                           color: const Color(0xFF006492),
                           fontSize: 14,
@@ -372,23 +367,6 @@ class _CompletedAppointmentsDetailsScreenState
                       ),
 
                       const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: const [
-                          Icon(Icons.star,    color: const Color(0xFFCA850C), size: 20),
-                          SizedBox(width: 4),
-                          Text(
-                            '4.9 (120 reviews)',
-                            style: TextStyle(
-                              color: const Color(0xFFCA850C),
-                              fontSize: 14,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w600,
-                              height: 1.43,
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
@@ -459,7 +437,7 @@ class _CompletedAppointmentsDetailsScreenState
                                       style: const TextStyle(color: Colors.grey,fontSize: 12),
                                     ),
                                     Text(
-                                      model.patient?.name ?? "Marcus Chen",
+                                      model.patient?.name ?? "",
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -473,11 +451,11 @@ class _CompletedAppointmentsDetailsScreenState
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "AGE/GENDER",
+                                      "AGE",
                                       style: const TextStyle(color: Colors.grey,fontSize: 12),
                                     ),
                                     Text(
-                                      "${model.patient?.age ?? 28}, Male",
+                                      "${model.patient?.age ?? '--'} Years",
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -516,9 +494,9 @@ class _CompletedAppointmentsDetailsScreenState
                         decoration: BoxDecoration(color: const Color(0xFFF0F4FA)),
 
                         child: Text(
-                          '"Persistent headache localized\nbehind the left eye for 3 days.\nSensitivity to light and mild nausea."',
-                          style: TextStyle(
-                            color: const Color(0xFF171C20),
+                          model.notes ?? "No notes provided",
+                          style: const TextStyle(
+                            color: Color(0xFF171C20),
                             fontSize: 14,
                             fontStyle: FontStyle.italic,
                             fontFamily: 'Inter',
@@ -571,20 +549,20 @@ class _CompletedAppointmentsDetailsScreenState
                   ),
                   child: Column(
                     children: [
-                      _buildPaymentRow("Consultation Fee", "₹599"),
-                      _buildPaymentRow("Booking Service Fee", "₹50"),
+                      _buildPaymentRow("Consultation Fee", "₹${model.amount ?? 0}"),
+                      _buildPaymentRow("Booking Service Fee", "₹0"),
                       const Divider(thickness: 1),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text(
+                        children: [
+                          const Text(
                             "Total Amount Paid",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           Text(
-                            "₹649",
-                            style: TextStyle(
+                            "₹${model.amount ?? 0}",
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                               color: Colors.blue,
@@ -661,15 +639,9 @@ class _CompletedAppointmentsDetailsScreenState
                             builder: (context) {
                               return AlertDialog(
                                 title: const Text("Consultation Transcript"),
-                                content: const SingleChildScrollView(
+                                content: SingleChildScrollView(
                                   child: Text(
-                                    "Patient reported severe headaches and light sensitivity. "
-                                    "Advised rest in a dark room and prescribed pain relievers. "
-                                    "Follow-up in 3 days if symptoms persist.\n\n"
-                                    "Detailed Transcript:\n"
-                                    "Doctor: How are you feeling today?\n"
-                                    "Patient: I have a terrible headache, Doctor.\n"
-                                    "Doctor: I see. Let me write you a prescription.",
+                                    model.transcript ?? "No transcript available for this consultation.",
                                   ),
                                 ),
                                 actions: [
@@ -817,9 +789,9 @@ class _CompletedAppointmentsDetailsScreenState
                       navSlideFromRight(
                         context, 
                         AssignAftercareScreen(
-                          patientId: widget.patientId ?? '',
-                          appointmentId: widget.appointmentId ?? '',
-                          patientName: widget.patientName ?? 'Patient',
+                          patientId: model.patient?.id ?? model.user?.id ?? '',
+                          appointmentId: widget.appointmentId,
+                          patientName: model.patient?.name ?? model.user?.name ?? 'Patient',
                         )
                       );
                     },
