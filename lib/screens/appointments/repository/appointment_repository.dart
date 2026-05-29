@@ -19,6 +19,15 @@ class AppointmentsRepository {
     }
   }
 
+  Future<dynamic> getAvailableDoctorsListApi() async {
+    try {
+      final response = await _apiService.postApiWithToken({}, AppUrl.commonDoctorList);
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<CheckDoctorExistingModel> checkDoctorExistingApi({
     required String mobileNumber,
     // required String appointmentId,

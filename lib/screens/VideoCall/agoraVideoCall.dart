@@ -8,6 +8,7 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../../core/coreServices/socket_service/join_call_provider.dart';
+import '../../core/coreServices/socket_service/socket_service.dart';
 import '../../core/utils/navigation_helper.dart';
 import '../appointments/view/upload_prescription_screen.dart';
 //
@@ -302,10 +303,26 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
 
   final List<int> _remoteUids = [];
 
+  // Chat related
+  final List<Map<String, dynamic>> _messages = [];
+  final TextEditingController _chatController = TextEditingController();
+  bool _hasUnreadMessages = false;
+
   @override
   void initState() {
     super.initState();
     _initAgora();
+    
+    // Listen to chat messages
+    SocketService().on("receive-message", (data) {
+      if (!mounted) return;
+      if (data['appointmentId'] == widget.appointmentId) {
+        setState(() {
+          _messages.add(data);
+          _hasUnreadMessages = true;
+        });
+      }
+    });
   }
 
   Future<void> _handleCallEnd() async {
@@ -471,6 +488,35 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          /// CHAT
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              FloatingActionButton(
+                heroTag: "chat",
+                backgroundColor: Colors.white,
+                onPressed: _openChatSheet,
+                child: const Icon(Icons.chat, color: Colors.blue),
+              ),
+              if (_hasUnreadMessages)
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 12,
+                      minHeight: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+
           /// MIC
           FloatingActionButton(
             heroTag: "mic",
@@ -512,21 +558,137 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
           FloatingActionButton(
             heroTag: "switch",
             backgroundColor: Colors.blue,
-            onPressed: () {
-              _engine?.switchCamera();
-              setState(() => _cameraFront = !_cameraFront);
+            onPressed: () async {
+              try {
+                await _engine?.switchCamera();
+                setState(() => _cameraFront = !_cameraFront);
+              } catch (e) {
+                debugPrint("Camera switch error: $e");
+              }
             },
-            child: const Icon(Icons.switch_camera),
+            child: const Icon(Icons.flip_camera_ios),
           ),
         ],
       ),
     );
   }
 
+  void _openChatSheet() {
+    setState(() => _hasUnreadMessages = false);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(builder: (context, setSheetState) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.6,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      border: Border(bottom: BorderSide(color: Colors.grey, width: 0.2)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Chat with Patient", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) {
+                        final msg = _messages[index];
+                        final isMe = msg['senderModel'] == 'Vendor';
+                        return Align(
+                          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isMe ? Colors.blue : Colors.grey.shade200,
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(16),
+                                topRight: const Radius.circular(16),
+                                bottomLeft: isMe ? const Radius.circular(16) : Radius.zero,
+                                bottomRight: isMe ? Radius.zero : const Radius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              msg['message'],
+                              style: TextStyle(color: isMe ? Colors.white : Colors.black87),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _chatController,
+                            decoration: InputDecoration(
+                              hintText: "Type a message...",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey.shade100,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        CircleAvatar(
+                          backgroundColor: Colors.blue,
+                          child: IconButton(
+                            icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                            onPressed: () {
+                              if (_chatController.text.trim().isNotEmpty) {
+                                final text = _chatController.text.trim();
+                                _chatController.clear();
+                                SocketService().emit("send-message", {
+                                  "appointmentId": widget.appointmentId,
+                                  "message": text,
+                                  "senderModel": "Vendor"
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
   @override
   void dispose() {
+    SocketService().off("receive-message");
     _engine?.leaveChannel();
     _engine?.release();
+    _chatController.dispose();
     super.dispose();
   }
 

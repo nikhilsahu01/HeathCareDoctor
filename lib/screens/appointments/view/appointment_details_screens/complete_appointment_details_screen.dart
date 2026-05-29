@@ -8,8 +8,9 @@ import '../../../../core/utils/custom_widgets/custom_app_button.dart';
 import '../../../../core/utils/custom_widgets/custom_image_view.dart';
 import '../../../../core/utils/custom_widgets/custom_threeDots_indecator.dart';
 import '../../../../core/utils/helper_functions/helpers_methods.dart';
-import '../../../../core/utils/navigation_helper.dart';
-import '../../../../core/utils/theams/color_resource.dart';
+import '../../../../../core/utils/navigation_helper.dart';
+import '../../../../../core/utils/theams/color_resource.dart';
+import 'assign_aftercare_screen.dart';
 import '../../viewModel/appointments_details_viewModel.dart';
 import '../reschedule_bottombar.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart'; // For PDF preview
@@ -811,9 +812,16 @@ class _CompletedAppointmentsDetailsScreenState
                   ),
                   const SizedBox(height: 12),
                   CustomAppButton(
-                    label: "View Aftercare Plan",
-                    onPressed: ()async {
-                      // navSlideFromRight(context, AfterCareScreen());
+                    label: "Assign Aftercare / View Logs",
+                    onPressed: () async {
+                      navSlideFromRight(
+                        context, 
+                        AssignAftercareScreen(
+                          patientId: widget.patientId ?? '',
+                          appointmentId: widget.appointmentId ?? '',
+                          patientName: widget.patientName ?? 'Patient',
+                        )
+                      );
                     },
                   ),
                 ] else ...[

@@ -10,7 +10,29 @@ import 'inviteDoctorModel.dart';
 class AppointmentViewModel extends ChangeNotifier {
   final AppointmentsRepository _repository = AppointmentsRepository();
   CheckDoctorExistingModel? checkDoctorExistingModel;
-  InviteDoctorModel?inviteDoctorModel;
+  InviteDoctorModel? inviteDoctorModel;
+  
+  List<dynamic> _availableDoctors = [];
+  List<dynamic> get availableDoctors => _availableDoctors;
+  bool _isLoadingDoctors = false;
+  bool get isLoadingDoctors => _isLoadingDoctors;
+
+  Future<void> fetchDoctorList() async {
+    _isLoadingDoctors = true;
+    notifyListeners();
+    try {
+      final response = await _repository.getAvailableDoctorsListApi();
+      if (response['success'] == true) {
+        _availableDoctors = response['data'] ?? [];
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetchDoctorList: $e");
+    } finally {
+      _isLoadingDoctors = false;
+      notifyListeners();
+    }
+  }
+
   // Upcoming
   List<AppointmentsList> _upcomingAppointments = [];
   bool _isLoadingUpcoming = false;
