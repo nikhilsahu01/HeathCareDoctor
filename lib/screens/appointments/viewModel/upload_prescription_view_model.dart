@@ -8,7 +8,7 @@ class UploadPrescriptionViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  Future<bool> uploadPrescription(String appointmentId, File file) async {
+  Future<bool> uploadPrescription(String appointmentId, File file, {String? notes}) async {
     _isLoading = true;
     notifyListeners();
 
@@ -20,7 +20,10 @@ class UploadPrescriptionViewModel extends ChangeNotifier {
       request.headers.addAll({
         'Authorization': 'Bearer $token',
       });
-      request.fields['appointment_id'] = appointmentId;
+      request.fields['appointmentId'] = appointmentId;
+      if (notes != null && notes.isNotEmpty) {
+        request.fields['notes'] = notes;
+      }
 
       request.files.add(await http.MultipartFile.fromPath('prescription', file.path));
 
