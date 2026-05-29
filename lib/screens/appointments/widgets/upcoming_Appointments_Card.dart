@@ -32,8 +32,9 @@ class _UpcomingAppointmentsCardState extends State<UpcomingAppointmentsCard> {
   Widget build(BuildContext context) {
     final vendorName = widget.model.patientName ?? 'Unknown Doctor';
     final specialization = widget.model.categoryName ?? 'Specialist';
-    final imageUrl =
-        'https://img.freepik.com/free-photo/businessman-formal-wear-professional-corporate-concept_53876-71166.jpg';
+    final imageUrl = (widget.model.patientImage != null && widget.model.patientImage!.isNotEmpty)
+        ? (widget.model.patientImage!.startsWith('http') ? widget.model.patientImage! : '${AppUrl.baseUrl}/${widget.model.patientImage!}')
+        : 'https://img.freepik.com/free-photo/businessman-formal-wear-professional-corporate-concept_53876-71166.jpg';
 
     final canJoin = context.watch<JoinCallNotifier>().canJoin(
       widget.model.appointmentId ?? '',

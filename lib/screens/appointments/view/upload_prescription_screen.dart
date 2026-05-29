@@ -50,10 +50,12 @@ class _UploadPrescriptionScreenState extends State<UploadPrescriptionScreen> {
     bool notesSuccess = true;
 
     if (_selectedFile != null) {
-      uploadSuccess = await vm.uploadPrescription(widget.appointmentId, _selectedFile!);
-    }
-
-    if (_notesController.text.trim().isNotEmpty) {
+      uploadSuccess = await vm.uploadPrescription(
+        widget.appointmentId, 
+        _selectedFile!,
+        notes: _notesController.text.trim(),
+      );
+    } else if (_notesController.text.trim().isNotEmpty) {
       notesSuccess = await vm.saveConsultationNotes(widget.appointmentId, _notesController.text.trim());
     }
 
