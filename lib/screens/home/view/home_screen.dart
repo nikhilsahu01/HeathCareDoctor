@@ -654,7 +654,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(16),
                 child: SizedBox(
                   width: 80,
-                  height: 80,
                   child: model.patientImage != null && model.patientImage!.isNotEmpty
                       ? Image.network(
                           model.patientImage!.startsWith('http') 
@@ -662,9 +661,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : '${AppUrl.baseUrl}/${model.patientImage!}',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => 
-                              Image.asset("assets/icons/balawant.jpg", fit: BoxFit.cover),
+                              const Icon(Icons.person, size: 40, color: Colors.grey),
                         )
-                      : Image.asset("assets/icons/balawant.jpg", fit: BoxFit.cover),
+                      : const Icon(Icons.person, size: 40, color: Colors.grey),
                 ),
               ),
               const SizedBox(width: 16),
@@ -782,15 +781,14 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               width: 48,
               height: 48,
-              color: const Color(0xFFE4E8EE),
               child: model.patientImage != null && model.patientImage!.isNotEmpty
                   ? Image.network(
                       model.patientImage!.startsWith('http') ? model.patientImage! : '${AppUrl.baseUrl}/${model.patientImage!}',
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => 
-                          Image.network("https://t4.ftcdn.net/jpg/06/10/87/07/360_F_610870738_xBnYHvfBrRFVpVkUUT3PkVc7TZdukIlx.jpg", fit: BoxFit.cover),
+                          const Icon(Icons.person, size: 30, color: Colors.grey),
                     )
-                  : Image.network("https://t4.ftcdn.net/jpg/06/10/87/07/360_F_610870738_xBnYHvfBrRFVpVkUUT3PkVc7TZdukIlx.jpg", fit: BoxFit.cover),
+                  : const Icon(Icons.person, size: 30, color: Colors.grey),
             ),
           ),
           const SizedBox(width: 12),

@@ -199,6 +199,9 @@ class AppointmentDetailsData {
   bool? isReminder;
   String? createdAt;
   String? updatedAt;
+  num? amount;
+  List<dynamic>? attachments;
+  String? transcript;
 
   AppointmentDetailsData(
       {this.appointmentId,
@@ -217,7 +220,10 @@ class AppointmentDetailsData {
         this.cancellReason,
         this.isReminder,
         this.createdAt,
-        this.updatedAt});
+        this.updatedAt,
+        this.amount,
+        this.attachments,
+        this.transcript});
 
   AppointmentDetailsData.fromJson(Map<String, dynamic> json) {
     appointmentId = json['appointmentId'];
@@ -239,6 +245,9 @@ class AppointmentDetailsData {
     isReminder = json['isReminder'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
+    amount = json['amount'];
+    attachments = json['attachments'] ?? [];
+    transcript = json['transcript'];
   }
 
   Map<String, dynamic> toJson() {
@@ -266,6 +275,9 @@ class AppointmentDetailsData {
     data['isReminder'] = this.isReminder;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
+    data['amount'] = this.amount;
+    data['attachments'] = this.attachments;
+    data['transcript'] = this.transcript;
     return data;
   }
 }
