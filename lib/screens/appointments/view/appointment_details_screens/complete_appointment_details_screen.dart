@@ -817,9 +817,9 @@ class _CompletedAppointmentsDetailsScreenState
                       navSlideFromRight(
                         context, 
                         AssignAftercareScreen(
-                          patientId: widget.patientId ?? '',
-                          appointmentId: widget.appointmentId ?? '',
-                          patientName: widget.patientName ?? 'Patient',
+                          patientId: model.patient?.id ?? model.user?.id ?? '',
+                          appointmentId: widget.appointmentId,
+                          patientName: model.patient?.name ?? model.user?.name ?? 'Patient',
                         )
                       );
                     },
