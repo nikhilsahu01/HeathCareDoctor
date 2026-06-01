@@ -128,6 +128,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/custom_widgets/custom_image_view.dart';
 import '../../../core/utils/theams/color_resource.dart';
+import '../../appointments/view/appointment_details_screens/complete_appointment_details_screen.dart';
 import '../model/patients_model.dart';
 
 class CompletedAppointmentCard extends StatelessWidget {
@@ -312,7 +313,15 @@ class CompletedAppointmentCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     side: BorderSide(color: Colors.grey.shade200),
                   ),
-                  child: const Text("View Report", style: TextStyle(color: Colors.black87)),
+                  child: GestureDetector
+
+                    (
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) =>  CompletedAppointmentsDetailsScreen( appointmentId:
+                        model.appointmentId ?? '',
+                            profileImage: imageUrl,),));
+                      },
+                      child: const Text("View Report", style: TextStyle(color: Colors.black87))),
                 ),
               ),
               const SizedBox(width: 12),

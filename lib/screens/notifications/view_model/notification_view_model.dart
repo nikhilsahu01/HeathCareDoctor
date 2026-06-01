@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:doctors/core/api_service/app_url.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/notification_model.dart';
 
@@ -72,5 +73,33 @@ class NotificationViewModel extends ChangeNotifier {
   Future<void> markAllAsRead() async {
     // Currently, backend might not have a markAllAsRead endpoint
     // If it does, we can implement it here.
+  }
+}
+
+
+class DateTimeHelper {
+
+  static String formatIndianDateTime(String? dateTime) {
+
+    if (dateTime == null || dateTime.isEmpty) {
+      return "N/A";
+    }
+
+    try {
+
+      // API UTC time parse
+      DateTime utcTime = DateTime.parse(dateTime);
+
+      // Local timezone me convert (India me IST)
+      DateTime indianTime = utcTime.toLocal();
+
+      // Format
+      return DateFormat(
+        'dd MMM yyyy, hh:mm a',
+      ).format(indianTime);
+
+    } catch (e) {
+      return dateTime;
+    }
   }
 }

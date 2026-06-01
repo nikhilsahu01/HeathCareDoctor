@@ -164,7 +164,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    notification.createdAt ?? '',
+                                    DateTimeHelper.formatIndianDateTime(
+                                      notification.createdAt,
+                                    ),
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.black38,

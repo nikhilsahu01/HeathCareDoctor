@@ -27,12 +27,12 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 3
-        versionName = "1.0.3"
+        versionCode = 4
+        versionName = "1.0.4"
     }
     signingConfigs {
         create("release") {
-            storeFile = file("doctor_health_care.jks")
+            storeFile = file("E:\\health\\HeathCareDoctor\\android\\app\\doctor_health_care.jks")
             storePassword = "123456"
             keyAlias = "doctor_health_care"
             keyPassword = "123456"
