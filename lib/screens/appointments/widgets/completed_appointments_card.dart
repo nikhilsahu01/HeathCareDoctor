@@ -362,8 +362,7 @@ class CompletedAppointmentCard extends StatelessWidget {
     final date = HelperMethods.formatAppointmentDate(
         model.appointmentDate ?? 'N/A');
 
-    final imageUrl =
-        'https://img.freepik.com/free-photo/businessman-formal-wear-professional-corporate-concept_53876-71166.jpg';
+    final imageUrl = model.patientImage ?? "";
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

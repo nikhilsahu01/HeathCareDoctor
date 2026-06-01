@@ -153,6 +153,8 @@
 //
 
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../../core/utils/theams/color_resource.dart';
 import '../../appointments/view/appointments_Screen.dart';
@@ -194,20 +196,156 @@ class BottomNavControllerState extends State<BottomNavController> {
     });
   }
 
+  Future<bool> _showExitDialog(BuildContext context) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+
+                Container(
+                  height: 70,
+                  width: 70,
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.logout_rounded,
+                    color: Colors.red.shade400,
+                    size: 35,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                const Text(
+                  "Exit App",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                Text(
+                  "Are you sure you want to close the application?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 15,
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                Row(
+                  children: [
+
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                        child: const Text(
+                          "Exit",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ) ??
+        false;
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bgColor,
-      extendBody: true, // Allows body to flow behind the rounded nav bar
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        bool shouldExit = await _showExitDialog(context);
+
+        if (shouldExit) {
+          exit(0);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: bgColor,
+        extendBody: true, // Allows body to flow behind the rounded nav bar
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _pages,
+        ),
+        bottomNavigationBar: ColoredBox(
+            color: Colors.white,
+            child: SafeArea(child: _buildBottomBar())),
       ),
-      bottomNavigationBar: ColoredBox(
-        color: Colors.white,
-          child: SafeArea(child: _buildBottomBar())),
     );
   }
+
+
+
+
+
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     backgroundColor: bgColor,
+  //     extendBody: true, // Allows body to flow behind the rounded nav bar
+  //     body: IndexedStack(
+  //       index: _currentIndex,
+  //       children: _pages,
+  //     ),
+  //     bottomNavigationBar: ColoredBox(
+  //       color: Colors.white,
+  //         child: SafeArea(child: _buildBottomBar())),
+  //   );
+  // }
 
   Widget _buildBottomBar() {
     return Container(
