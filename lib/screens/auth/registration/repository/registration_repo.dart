@@ -20,6 +20,7 @@ class RegistrationRepository {
     required String type,
     required String address,
     required List<String> department,
+    required String registrationYear,
     required String yearOfExp,
     required String licOrRegNumber,
     required String state,
@@ -45,6 +46,7 @@ class RegistrationRepository {
         "type": type,
         "address": address,
         "department": department.join(","),
+        "registrationYear": registrationYear,
         "yearOfExp": yearOfExp,
         "licOrRegNumber": licOrRegNumber,
         "state": state,
@@ -80,6 +82,9 @@ class RegistrationRepository {
         "profileImage": profileImage,
         "certificate": certificateFile,
       };
+
+      print("*****************************************Registration Year => $registrationYear");
+      print("****************************************************************8Fields => $fields");
 
       final response = await _apiService.postMultipartRegisterApi(
         url: AppUrl.signUp,

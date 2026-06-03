@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_pip_mode/simple_pip.dart';
 import '../../core/coreServices/socket_service/join_call_provider.dart';
 import '../../core/coreServices/socket_service/socket_service.dart';
 import '../../core/utils/navigation_helper.dart';
@@ -295,6 +296,7 @@ class AgoraVideoCallScreen extends StatefulWidget {
 
 class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
   RtcEngine? _engine;
+  final SimplePip _simplePip = SimplePip();
   bool _callEnded = false;
 
 
@@ -308,11 +310,20 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
   final List<Map<String, dynamic>> _messages = [];
   final TextEditingController _chatController = TextEditingController();
   bool _hasUnreadMessages = false;
+  late Future doctorFuture;
 
   @override
+
+
+
   void initState() {
     super.initState();
     _initAgora();
+
+    doctorFuture = NetworkApiServices().postApiWithToken(
+      {"categoryid": ""},
+      AppUrl.commonDoctorList,
+    );
     
     // Listen to chat messages
     SocketService().on("receive-message", (data) {
@@ -694,6 +705,10 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
   }
 
   void _openInviteSheet() {
+
+    final TextEditingController searchController = TextEditingController();
+    List filteredDoctors = [];
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -725,7 +740,7 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
                   ),
                   Expanded(
                     child: FutureBuilder(
-                      future: NetworkApiServices().postApiWithToken({"categoryid": ""}, AppUrl.commonDoctorList),
+                      future: doctorFuture,
                       builder: (context, AsyncSnapshot snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Center(child: CircularProgressIndicator());
@@ -735,47 +750,91 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
                         }
                         final data = snapshot.data;
                         final List doctors = data != null && data['data'] != null ? data['data'] : [];
+                        if (searchController.text.isEmpty &&
+                            filteredDoctors.isEmpty) {
+                          filteredDoctors = List.from(doctors);
+                        }
                         if (doctors.isEmpty) {
                           return const Center(child: Text("No doctors available"));
                         }
 
-                        return ListView.builder(
-                          itemCount: doctors.length,
-                          itemBuilder: (context, index) {
-                            final doc = doctors[index];
-                            final docId = doc['_id'];
-                            final docName = doc['Name'] ?? 'Unknown';
-                            final docDept = doc['department'] != null && doc['department'].isNotEmpty ? doc['department'][0] : 'General';
-                            final profileImage = doc['profileImage'];
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: TextField(
+                                controller: searchController,
+                                decoration: const InputDecoration(
+                                  hintText: "Search doctor...",
+                                  prefixIcon: Icon(Icons.search),
+                                  border: OutlineInputBorder(),
+                                ),
+                                onChanged: (value) {
+                                  setSheetState(() {
 
-                            return ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: profileImage != null && profileImage.toString().isNotEmpty 
-                                    ? NetworkImage(profileImage.toString()) 
-                                    : null,
-                                child: profileImage == null || profileImage.toString().isEmpty ? const Icon(Icons.person) : null,
-                              ),
-                              title: Text(docName),
-                              subtitle: Text(docDept),
-                              trailing: ElevatedButton(
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                                onPressed: () {
-                                  // Emit socket event to the other doctor
-                                  SocketService().emit("invite-doctor", {
-                                    "doctorId": docId,
-                                    "appointmentId": widget.appointmentId,
-                                    "channelName": widget.channelName,
-                                    "token": widget.token,
+                                    if (value.trim().isEmpty) {
+                                      filteredDoctors = List.from(doctors);
+                                      return;
+                                    }
+
+                                    filteredDoctors = doctors.where((doc) {
+
+                                      final name =
+                                      (doc['Name'] ?? '')
+                                          .toString()
+                                          .toLowerCase();
+
+                                      return name.contains(
+                                        value.toLowerCase(),
+                                      );
+
+                                    }).toList();
+
                                   });
-                                  Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text("Invite sent to $docName")),
+                                },
+                              ),
+                            ),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: filteredDoctors.length,
+                                itemBuilder: (context, index) {
+                                  final doc = filteredDoctors[index];
+                                  final docId = doc['_id'];
+                                  final docName = doc['Name'] ?? 'Unknown';
+                                  final docDept = doc['department'] != null && doc['department'].isNotEmpty ? doc['department'][0] : 'General';
+                                  final profileImage = doc['profileImage'];
+                              
+                                  return ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundImage: profileImage != null && profileImage.toString().isNotEmpty
+                                          ? NetworkImage(profileImage.toString())
+                                          : null,
+                                      child: profileImage == null || profileImage.toString().isEmpty ? const Icon(Icons.person) : null,
+                                    ),
+                                    title: Text(docName),
+                                    subtitle: Text(docDept),
+                                    trailing: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                                      onPressed: () {
+                                        // Emit socket event to the other doctor
+                                        SocketService().emit("invite-doctor", {
+                                          "doctorId": docId,
+                                          "appointmentId": widget.appointmentId,
+                                          "channelName": widget.channelName,
+                                          "token": widget.token,
+                                        });
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text("Invite sent to $docName")),
+                                        );
+                                      },
+                                      child: const Text("Invite", style: TextStyle(color: Colors.white)),
+                                    ),
                                   );
                                 },
-                                child: const Text("Invite", style: TextStyle(color: Colors.white)),
                               ),
-                            );
-                          },
+                            ),
+                          ],
                         );
                       },
                     ),
@@ -801,10 +860,26 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
   @override
   Widget build(BuildContext context) {
     if (_engine == null) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.white),
+      return PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          if (didPop) return;
+
+          try {
+
+            await _simplePip.enterPipMode();
+
+          } catch (e) {
+
+            debugPrint("PIP Error : $e");
+
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
         ),
       );
     }
