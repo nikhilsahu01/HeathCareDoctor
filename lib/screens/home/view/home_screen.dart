@@ -602,6 +602,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _StatCard(
                       title: "Growth",
                       value: viewModel.dashboardModel?.data?.growth ?? 0,
+                      performance: viewModel.dashboardModel?.data?.growth ?? 0,
                       icon: Icons.trending_up_rounded,
                       accentColor: const Color(0xFF9C27B0),
                       // accentColor: const Color(0xFF9C27B0),
@@ -873,6 +874,7 @@ class _StatCard extends StatelessWidget {
   final IconData icon;
   final Color accentColor;
   final bool isPercentage;
+  final num? performance;
 
   const _StatCard({
     required this.title,
@@ -883,9 +885,12 @@ class _StatCard extends StatelessWidget {
     required this.g2,
     required this.accentColor,
     required this.onTap,
+    this.performance ,
 
     this.isPercentage = false,
   });
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -924,9 +929,9 @@ class _StatCard extends StatelessWidget {
                   child: Icon(icon, color: accentColor, size: 20),
                 ),
                 Text(
-                  '+4%',
+                  "${(performance ?? 0) > 0? "+" : ''}${performance ?? 0}%",
                   style: TextStyle(
-                    color: const Color(0xFF006D37),
+                    color: (performance ?? 0) >= 0 ? Color(0xFF006D37) : Colors.red,
                     fontSize: 16,
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w700,

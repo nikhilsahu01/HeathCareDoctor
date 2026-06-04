@@ -4,9 +4,15 @@ import 'package:flutter/foundation.dart';
 class JoinCallNotifier extends ChangeNotifier {
   final Set<String> _joinableAppointments = {};
 
-  bool canJoin(String appointmentId) => _joinableAppointments.contains(appointmentId);
+  bool canJoin(String appointmentId) {
+
+    return _joinableAppointments.contains(appointmentId);
+  }
 
   void enableJoin(String appointmentId) {
+
+
+
     _joinableAppointments.add(appointmentId);
     notifyListeners();
   }

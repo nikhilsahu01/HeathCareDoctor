@@ -32,6 +32,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool isSubmitting = false;
   final _formKey = GlobalKey<FormState>();
   File? _selectedImage;
+  Country? selectedCountry;
 
   File? profileFile;
   File? certificateFile;
@@ -43,6 +44,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController typeController = TextEditingController(text: "doctor");
   final TextEditingController addressController = TextEditingController();
   final TextEditingController departmentController = TextEditingController();
+  final TextEditingController registrationController = TextEditingController();
   final TextEditingController experienceController = TextEditingController();
   final TextEditingController licenseController = TextEditingController();
   final TextEditingController stateController = TextEditingController();
@@ -93,6 +95,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       countryController.text = 'India';
     }
 
+    selectedCountry = countries.firstWhere(
+          (c) => c.code == (widget.isoCode ?? 'IN'),
+    );
+
+
     // Fetch categories & symptoms when screen loads
     Future.microtask(() {
       final provider = Provider.of<RegistrationProvider>(context, listen: false);
@@ -100,6 +107,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       provider.fetchSymptomsApi();
       provider.fetchQualificationTree();
     });
+
+
+    registrationController.addListener(() {
+      final text = registrationController.text.trim();
+
+      if (text.length == 4) {
+        final regYear = int.tryParse(text);
+
+        if (regYear != null &&
+            regYear >= 1950 &&
+            regYear <= DateTime.now().year) {
+          experienceController.text =
+              (DateTime.now().year - regYear).toString();
+        } else {
+          experienceController.clear();
+        }
+      } else {
+        experienceController.clear();
+      }
+    });
+
+
   }
 
   @override
@@ -190,7 +219,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 CustomTextField(
                     label: "Name",
                     controller: nameController,
-                    validator: validateName),
+                    validator: validateName
+                ),
                 const SizedBox(height: 15),
 
                 Consumer<RegistrationProvider>(
@@ -259,9 +289,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       if (value == null || value.number.isEmpty) {
                         return 'Mobile number is required';
                       }
-                      if (value.number.length < 6) {
-                        return 'Enter a valid number';
+
+                      final expectedLength = selectedCountry?.maxLength ?? 10;
+
+                      if (value.number.length != expectedLength) {
+                        return 'Mobile number must be $expectedLength digits';
                       }
+
                       return null;
                     },
                     onChanged: (phone) {
@@ -270,6 +304,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     },
                     onCountryChanged: (country) {
                       setState(() {
+                        selectedCountry = country;
                         countryController.text = country.name;
                       });
                     },
@@ -332,6 +367,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 const SizedBox(height: 15),
 
                 CustomTextField(
+                    label: "Registration Year",
+                  controller: registrationController,
+                  validator: justForEmpty,
+                  maxLength: 4,
+                  keyboardType: TextInputType.number,
+                ),
+
+                const SizedBox(height: 15),
+                CustomTextField(
                   label: "Years of Experience",
                   controller: experienceController,
                   validator: justForEmpty,
@@ -349,11 +393,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 CustomTextField(
                   label: "Pincode",
                   controller: cityPinController,
-                  maxLength: 6,
+                  // maxLength: 6,
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty) return 'Pincode is required';
-                    if (val.trim().length != 6) return 'Pincode must be exactly 6 digits';
-                    return null;
+                    // if (val == null || val.trim().isEmpty) return 'Pincode is required';
+                    // if (val.trim().length != 6) return 'Pincode must be exactly 6 digits';
+                    // return null;
+                    return validatePostalCode(
+                      val ?? '',
+                      selectedCountry?.code ?? 'IN',
+                    );
                   },
                   keyboardType: TextInputType.number,
                   onChanged: (val) async {
@@ -530,6 +578,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 .split(',')
                                 .map((e) => e.trim())
                                 .toList(),
+                            registrationYear: registrationController.text.trim(),
                             experience: experienceController.text.trim(),
                             license: licenseController.text.trim(),
                             state: stateController.text.trim(),
@@ -564,4 +613,47 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
     );
   }
+
+
+  String? validatePostalCode(
+      String value,
+      String countryCode,
+      ) {
+    if (value.isEmpty) {
+      return 'Postal code required';
+    }
+
+    switch (countryCode) {
+      case 'IN':
+        return RegExp(r'^\d{6}$').hasMatch(value)
+            ? null
+            : 'Enter valid 6 digit pincode';
+
+      case 'US':
+        return RegExp(r'^\d{5}$').hasMatch(value)
+            ? null
+            : 'Enter valid 5 digit ZIP';
+
+      case 'CA':
+        return RegExp(
+          r'^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$',
+        ).hasMatch(value)
+            ? null
+            : 'Enter valid postal code';
+
+      case 'GB':
+        return RegExp(
+          r'^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$',
+        ).hasMatch(value.toUpperCase())
+            ? null
+            : 'Enter valid postal code';
+
+      default:
+        if (value.length < 3) {
+          return 'Invalid postal code';
+        }
+        return null;
+    }
+  }
+
 }

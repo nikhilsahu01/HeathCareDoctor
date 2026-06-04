@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:flutter/material.dart';
 import '../../../main.dart';
 import '../../api_service/app_url.dart';
 import 'join_call_provider.dart';
+import '../../../screens/VideoCall/agoraVideoCall.dart';
 
 class SocketService {
   static final SocketService _instance = SocketService._internal();
@@ -117,6 +119,56 @@ class SocketService {
 
       _handleEndCall(appointmentId);
       _stopHeartbeat(); // ❌ Stop emitting heartbeat
+    });
+
+    // Doctor Invite received
+    _socket.on('receive-doctor-invite', (data) {
+      final appointmentId = data['appointmentId'];
+      final channelName = data['channelName'];
+      final token = data['token'];
+
+      print('📩 receive-doctor-invite for appointment: $appointmentId');
+
+      final context = MyApp.navigatorKey.currentContext;
+      if (context != null) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext ctx) {
+            return AlertDialog(
+              title: const Text('Incoming Consultation Invite'),
+              content: const Text('Another doctor is inviting you to join a live consultation.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(ctx); // Close dialog
+                  },
+                  child: const Text('Reject', style: TextStyle(color: Colors.red)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                  onPressed: () {
+                    Navigator.pop(ctx); // Close dialog
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AgoraVideoCallScreen(
+                          channelName: channelName,
+                          token: token,
+                          appointmentId: appointmentId,
+                          uid: 0,
+                          isDoctor: true,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Join Call', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      }
     });
   }
 

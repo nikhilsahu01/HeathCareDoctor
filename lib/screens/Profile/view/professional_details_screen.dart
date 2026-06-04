@@ -193,27 +193,29 @@ class _ProfessionalDetailsScreenState extends State<ProfessionalDetailsScreen> {
                                 ),
                               ),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   const Text(
-                                    "Upload Medical Registration Documents",
+                                    // "Upload Medical Registration Documents",
+                                    "View Upload Document",
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black87,
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
-                                  const Text(
-                                    "PDF only • Multiple files allowed • Max 10 MB each",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
+                                  // const SizedBox(height: 6),
+                                  // const Text(
+                                  //   "PDF only • Multiple files allowed • Max 10 MB each",
+                                  //   style: TextStyle(
+                                  //     fontSize: 13,
+                                  //     color: Colors.grey,
+                                  //   ),
+                                  // ),
                                   const SizedBox(height: 20),
 
-                                  if (provider.profileData?.data?.certificate != null) ...[
+                                  if ((provider.profileData?.data?.certificate ?? "").isNotEmpty) ...[
+
                                     Container(
                                       width: double.infinity,
                                       margin: const EdgeInsets.only(bottom: 15),
@@ -228,67 +230,70 @@ class _ProfessionalDetailsScreenState extends State<ProfessionalDetailsScreen> {
                                             );
                                           }
                                         },
+
                                         icon: const Icon(Icons.remove_red_eye),
                                         label: const Text("View Uploaded Document"),
                                         style: ElevatedButton.styleFrom(
+
                                           foregroundColor: Colors.white, backgroundColor: ColorResource.primaryColor,
                                           padding: const EdgeInsets.symmetric(vertical: 12),
                                         ),
                                       ),
                                     ),
-                                    const Center(child: Text("OR", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold))),
-                                    const SizedBox(height: 15),
+                                    // const Center(child: Text("OR", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold))),
+                                    // const SizedBox(height: 15),
                                   ],
 
-                                  // Dashed Border Upload Area (Clickable)
-                                  GestureDetector(
-                                    onTap: () async {
-                                      await _pickDocuments(provider);
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 120,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade50,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                          color: Colors.grey.shade400,
-                                          width: 1,
-                                          style: BorderStyle.solid,
-                                        ),
-                                        // Dashed effect using custom decoration
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.cloud_upload_outlined,
-                                            size: 40,
-                                            color: Colors.grey.shade600,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            "Tap to upload PDFs",
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey.shade700,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            "Maximum 10 MB per file",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey.shade500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
 
-                                  const SizedBox(height: 16),
+                                  // Dashed Border Upload Area (Clickable)
+                                  // GestureDetector(
+                                  //   onTap: () async {
+                                  //     await _pickDocuments(provider);
+                                  //   },
+                                  //   child: Container(
+                                  //     width: double.infinity,
+                                  //     height: 120,
+                                  //     decoration: BoxDecoration(
+                                  //       color: Colors.grey.shade50,
+                                  //       borderRadius: BorderRadius.circular(10),
+                                  //       border: Border.all(
+                                  //         color: Colors.grey.shade400,
+                                  //         width: 1,
+                                  //         style: BorderStyle.solid,
+                                  //       ),
+                                  //       // Dashed effect using custom decoration
+                                  //     ),
+                                  //     child: Column(
+                                  //       mainAxisAlignment: MainAxisAlignment.center,
+                                  //       children: [
+                                  //         Icon(
+                                  //           Icons.cloud_upload_outlined,
+                                  //           size: 40,
+                                  //           color: Colors.grey.shade600,
+                                  //         ),
+                                  //         const SizedBox(height: 8),
+                                  //         Text(
+                                  //           "Tap to upload PDFs",
+                                  //           style: TextStyle(
+                                  //             fontSize: 15,
+                                  //             fontWeight: FontWeight.w500,
+                                  //             color: Colors.grey.shade700,
+                                  //           ),
+                                  //         ),
+                                  //         const SizedBox(height: 4),
+                                  //         Text(
+                                  //           "Maximum 10 MB per file",
+                                  //           style: TextStyle(
+                                  //             fontSize: 12,
+                                  //             color: Colors.grey.shade500,
+                                  //           ),
+                                  //         ),
+                                  //       ],
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  //
+                                  // const SizedBox(height: 16),
 
                                   // Selected Files List
                                   if (provider.selectedDocuments.isNotEmpty)
