@@ -254,6 +254,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IntlPhoneField(
+                    controller: mobController,
                     initialValue:
                     widget.mobAvailable == true ? widget.mobileNumber : null,
                     initialCountryCode:
@@ -261,7 +262,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                    readOnly: widget.mobAvailable ?? false,
                     enabled: !(widget.mobAvailable ?? false),
                     showDropdownIcon: true,
-                    showCountryFlag: false,
+                    showCountryFlag: true,
                     dropdownIcon: const Icon(Icons.arrow_drop_down,
                         color: ColorResource.primaryColor),
                     style: const TextStyle(color: Colors.black),
@@ -283,26 +284,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                       counterText: '',
                     ),
-                    // autovalidateMode: AutovalidateMode.onUserInteraction,
-                    // disableLengthCheck: false,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    disableLengthCheck: false,
                     validator: (value) {
                       if (value == null || value.number.isEmpty) {
                         return 'Mobile number is required';
                       }
 
-                      final expectedLength = selectedCountry?.maxLength ?? 10;
-
-                      if (value.number.length != expectedLength) {
-                        return 'Mobile number must be $expectedLength digits';
+                      if (!value.isValidNumber()) {
+                        return 'Invalid mobile number';
                       }
 
                       return null;
                     },
                     onChanged: (phone) {
-                      mobController.text = phone.number;
                       countryCodeController.text = phone.countryCode;
                     },
                     onCountryChanged: (country) {
+                      mobController.clear();
                       setState(() {
                         selectedCountry = country;
                         countryController.text = country.name;

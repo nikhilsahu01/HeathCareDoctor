@@ -148,6 +148,7 @@ class _ProfessionalDetailsScreenState extends State<ProfessionalDetailsScreen> {
                             CustomTextFieldProfile(
                               label: "Medical Registration Number",
                               controller: provider.registrationNumber,
+                              isReadOnly: true,
                               validator: justForEmpty,
                             ),
                             const SizedBox(height: 15),

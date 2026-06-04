@@ -239,6 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String countryCode = '';
   String isoCode = '';
   bool isSending = false;
+  final TextEditingController phoneController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -328,6 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: IntlPhoneField(
+                            controller: phoneController,
                             initialCountryCode: 'IN',
                             showDropdownIcon: true,
                             showCountryFlag: true,
@@ -397,6 +399,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                               debugPrint("Full Number: $fullPhoneNumber");
                               debugPrint("ISO Code: $isoCode");
+                            },
+                            onCountryChanged: (country) {
+                              phoneController.clear();
+                              fullPhoneNumber = '';
+                              phoneNumber = '';
                             },
                           ),
                         ),

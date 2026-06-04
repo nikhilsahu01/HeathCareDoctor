@@ -1,17 +1,21 @@
 class NotificationModel {
   bool? success;
   String? message;
-  NotificationDataWrapper? data;
+  List<NotificationData>? data;
 
   NotificationModel({this.success, this.message, this.data});
 
   NotificationModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
-    data =
-        json['data'] != null
-            ? NotificationDataWrapper.fromJson(json['data'])
-            : null;
+    if (json['data'] != null) {
+      if (json['data'] is List) {
+        data = <NotificationData>[];
+        json['data'].forEach((v) {
+          data!.add(NotificationData.fromJson(v));
+        });
+      }
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -19,7 +23,7 @@ class NotificationModel {
     data['success'] = success;
     data['message'] = message;
     if (this.data != null) {
-      data['data'] = this.data!.toJson();
+      data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
     return data;
   }

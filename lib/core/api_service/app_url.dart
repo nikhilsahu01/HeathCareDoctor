@@ -25,7 +25,9 @@ class AppUrl {
   static const String degreeList = '$baseUrl/api/vendor/common/degree/list';
   static const String dashboard = '$baseUrl/api/vendor/auth/dashboard';
   static const String wallet = '$baseUrl/api/vendor/auth/wallet';
-  static const String notifications = '$baseUrl/api/vendor/auth/notifications';
+  static const String notifications = '$baseUrl/api/vendor/notifications';
   static const String qualificationTree = '$baseUrl/api/vendor/common/qualification/tree';
   static const String cms = '$baseUrl/api/vendor/common/cms';
+  static const String ticketCreate = '$baseUrl/api/vendor/ticket/create';
+  static const String ticketList = '$baseUrl/api/vendor/ticket/list';
 }

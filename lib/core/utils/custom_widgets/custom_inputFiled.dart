@@ -213,7 +213,7 @@ class CustomTextFieldProfile extends StatelessWidget {
   InputDecoration _inputDecoration() {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: isReadOnly ? Colors.grey.shade200 : Colors.white,
       contentPadding:
       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
