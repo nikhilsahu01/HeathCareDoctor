@@ -1,5 +1,7 @@
 
+import 'dart:io';
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:doctors/screens/Profile/view_model/profile_view_model.dart';
 import 'package:doctors/screens/appointments/viewModel/appointments_details_viewModel.dart';
 import 'package:doctors/screens/appointments/viewModel/appointments_viewModel.dart';
@@ -14,6 +16,7 @@ import 'package:doctors/screens/auth/otp/provider/otpProvider.dart';
 import 'package:doctors/screens/wallet/view_model/wallet_view_model.dart';
 import 'package:doctors/screens/appointments/viewModel/upload_prescription_view_model.dart';
 import 'package:doctors/screens/notifications/view_model/notification_view_model.dart';
+import 'package:doctors/screens/tickets/view_model/ticket_view_model.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +29,7 @@ import 'core/utils/helper_functions/screen_security.dart';
 import 'core/utils/theams/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   // await ScreenProtector.preventScreenshotOn(); // ✅ whole app pe apply
   // await ScreenProtector.preventScreenshotOn();  // enable
   // await ScreenProtector.preventScreenshotOff(); // disable
@@ -58,7 +62,25 @@ void main() async {
       print("⚠️ No token found. Skipping socket connection.");
     }
   });
-  runApp(const MyApp());
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [
+        Locale('en'),
+        Locale('hi'),
+        Locale('fr'), Locale('de'), Locale('es'),
+        Locale('it'), Locale('pt'), Locale('ru'),
+        Locale('nl'), Locale('pl'), Locale('ar'),
+        Locale('tr'), Locale('fa'), Locale('zh', 'CN'),
+        Locale('zh', 'TW'), Locale('ja'), Locale('ko'),
+        Locale('id'), Locale('th'), Locale('vi'),
+        Locale('sw'), Locale('af'),
+      ],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      startLocale: Locale(Platform.localeName.split('_')[0]),
+      child: const MyApp(),
+    ),
+  );
   // ScreenSecurity.disableScreenshotAndRecording();
 }
 
@@ -82,10 +104,14 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WalletViewModel()),
         ChangeNotifierProvider(create: (_) => UploadPrescriptionViewModel()),
         ChangeNotifierProvider(create: (_) => NotificationViewModel()),
+        ChangeNotifierProvider(create: (_) => TicketViewModel()),
       ],
       child: MaterialApp(
         title: 'Doctor',
         navigatorKey: navigatorKey,
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
         home: const SplashScreen(),

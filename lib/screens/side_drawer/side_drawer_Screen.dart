@@ -14,6 +14,9 @@ import '../Profile/view/professional_details_screen.dart';
 import '../Profile/view/personal_details_screen.dart';
 import '../Profile/view_model/profile_view_model.dart';
 import '../splash/splash_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../tickets/view/ticket_screen.dart';
+import '../settings/view/settings_screen.dart';
 import 'cms_screen.dart';
 import '../wallet/ui/walletScreen.dart';
 
@@ -38,8 +41,8 @@ class _SideDrawerScreenState extends State<SideDrawerScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
       // backgroundColor: Color(0xffEAF1F1),
-      appBar: const CustomAppBar(
-        title: 'Profile',
+      appBar: CustomAppBar(
+        title: 'profile'.tr(),
         isProfile: true,
         isBack: true,
       ),
@@ -147,7 +150,13 @@ class _SideDrawerScreenState extends State<SideDrawerScreen> {
                   _menuButton('Wallet & Earnings', () {
                     navSlideFromRight(context, const WalletScreen(isToday: false));
                   }),
-                  _menuButton('Log Out', () async {
+                  _menuButton('support_tickets'.tr(), () {
+                    navSlideFromRight(context, const TicketScreen());
+                  }),
+                  // _menuButton('settings'.tr(), () {
+                  //   navSlideFromRight(context, const SettingsScreen());
+                  // }),
+                  _menuButton('logout'.tr(), () async {
                     bool shouldLogout = await showLogoutDialog(context);
                     if(!shouldLogout) return;
                     final prefs = await SharedPreferences.getInstance();

@@ -52,22 +52,36 @@ class _NotificationScreenState extends State<NotificationScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 10,
+                  vertical: 4,
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(
-                      onPressed: () {
-                        viewModel.markAllAsRead();
-                      },
-                      child: const Text(
-                        "Mark all as read",
-                        style: TextStyle(
-                          color: ColorResource.primaryColor,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    const Text(
+                      "Recent",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            viewModel.markAllAsRead();
+                          },
+                          icon: const Icon(Icons.done_all, color: ColorResource.primaryColor),
+                          tooltip: "Mark all as read",
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            viewModel.clearAllNotifications();
+                          },
+                          icon: const Icon(Icons.delete_sweep, color: Colors.red),
+                          tooltip: "Clear All",
+                        ),
+                      ],
                     ),
                   ],
                 ),

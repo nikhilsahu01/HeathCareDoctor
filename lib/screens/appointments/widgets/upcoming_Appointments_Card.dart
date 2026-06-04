@@ -188,22 +188,42 @@ class _UpcomingAppointmentsCardState extends State<UpcomingAppointmentsCard> {
                     /// BUTTON ROW
                     Row(
                       children: [
-                        /// JOIN CALL BUTTON
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed:
-                                canJoin ? () => _handleJoinCall(context) : null,
-                            icon: const Icon(Icons.videocam, size: 18),
-                            label: const Text("Join Call"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0F5B7F),
+                        /// JOIN CALL BUTTON OR IN-CLINIC INDICATOR
+                        if (widget.model.type == 'inClinic')
+                          Expanded(
+                            child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
                                 borderRadius: BorderRadius.circular(30),
+                                border: Border.all(color: Colors.blue.shade100),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.local_hospital, size: 18, color: Colors.blue),
+                                  SizedBox(width: 8),
+                                  Text("In-Clinic", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  canJoin ? () => _handleJoinCall(context) : null,
+                              icon: const Icon(Icons.videocam, size: 18),
+                              label: const Text("Join Call"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0F5B7F),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
                               ),
                             ),
                           ),
-                        ),
 
                         const SizedBox(width: 10),
 

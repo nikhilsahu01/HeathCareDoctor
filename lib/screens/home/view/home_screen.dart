@@ -621,7 +621,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 // const SizedBox(height: 24),
 
                 // Profile Completion Card
-                _ProfileStatusCard(completion: viewModel.profileCompletion),
+                if (viewModel.profileCompletion < 1.0)
+                  _ProfileStatusCard(completion: viewModel.profileCompletion),
 
                 const SizedBox(height: 150), // Space for BottomNav
               ],
@@ -721,30 +722,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // Start Consultation Button with Video Call
-              GestureDetector(
-                onTap: () {
-                  if (canJoin) {
-                    _handleJoinCall(context, model);
-                  } else {
-                    HelperMethods.showFloatingToast(context, message: "Patient has not joined or appointment hasn't started yet.");
-                  }
-                },
-                child: Container(
+              // Start Consultation Button with Video Call / In-Clinic indicator
+              if (model.type == 'inClinic')
+                Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
-                    color: canJoin ? Colors.white : Colors.white.withOpacity(0.5),
+                    color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(25),
                   ),
                   child: Row(
-                    children: [
-                      Icon(Icons.video_camera_back, color: const Color(0xFF006492)),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Start\nConsultation',
+                    children: const [
+                      Icon(Icons.local_hospital, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        'In-Clinic\nAppointment',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Color(0xFF006492),
+                          color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           height: 1.5,
@@ -752,8 +746,40 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
+                )
+              else
+                GestureDetector(
+                  onTap: () {
+                    if (canJoin) {
+                      _handleJoinCall(context, model);
+                    } else {
+                      HelperMethods.showFloatingToast(context, message: "Patient has not joined or appointment hasn't started yet.");
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: canJoin ? Colors.white : Colors.white.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.video_camera_back, color: const Color(0xFF006492)),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Start\nConsultation',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFF006492),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
         ],

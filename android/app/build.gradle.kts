@@ -32,7 +32,7 @@ android {
     }
     signingConfigs {
         create("release") {
-            storeFile = file("E:\\health\\HeathCareDoctor\\android\\app\\doctor_health_care.jks")
+            storeFile = file("doctor_health_care.jks")
             storePassword = "123456"
             keyAlias = "doctor_health_care"
             keyPassword = "123456"
