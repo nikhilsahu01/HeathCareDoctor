@@ -181,6 +181,41 @@ class AppointmentViewModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> cancelAppointment(String appointmentId, String reason) async {
+    try {
+      final success = await _repository.cancelAppointment(
+        id: appointmentId,
+        cancelReason: reason,
+      );
+      if (success) {
+        fetchUpcomingAppointments();
+        fetchCancelledAppointments();
+      }
+      return success;
+    } catch (e) {
+      debugPrint("❌ Error cancelAppointment: $e");
+      return false;
+    }
+  }
+
+  Future<bool> rescheduleAppointment(String appointmentId, String newDate, String newTime, String reason) async {
+    try {
+      final success = await _repository.rescheduleAppointment(
+        id: appointmentId,
+        newDate: newDate,
+        newTime: newTime,
+        rescheduleReason: reason,
+      );
+      if (success) {
+        fetchUpcomingAppointments();
+      }
+      return success;
+    } catch (e) {
+      debugPrint("❌ Error rescheduleAppointment: $e");
+      return false;
+    }
+  }
+
   /// Fetch Completed Appointments
   Future<void> fetchCompletedAppointments() async {
     _isLoadingCompleted = true;

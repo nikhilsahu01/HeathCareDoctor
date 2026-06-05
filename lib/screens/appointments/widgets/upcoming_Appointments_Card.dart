@@ -9,6 +9,7 @@ import '../../../core/utils/navigation_helper.dart';
 import '../../VideoCall/agoraVideoCall.dart';
 import '../model/appointments_model.dart';
 import '../viewModel/appointments_viewModel.dart';
+import '../view/appointment_details_screens/upcoming_appointment_details_screen.dart';
 
 class UpcomingAppointmentsCard extends StatefulWidget {
   final AppointmentsList model;
@@ -43,8 +44,17 @@ class _UpcomingAppointmentsCardState extends State<UpcomingAppointmentsCard> {
       widget.model.appointmentDate ?? 'N/A',
     );
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () {
+        navSlideFromRight(
+          context,
+          UpcomingAndCancelledAppointmentDetailsScreen(
+            appointmentId: widget.model.appointmentId ?? '',
+          ),
+        );
+      },
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         /// LEFT TIMELINE
         Column(
@@ -157,6 +167,22 @@ class _UpcomingAppointmentsCardState extends State<UpcomingAppointmentsCard> {
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: widget.model.type == 'inClinic' ? Colors.orange.shade50 : Colors.purple.shade50,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      widget.model.type == 'inClinic' ? "In-Clinic" : "Video Call",
+                                      style: TextStyle(
+                                        color: widget.model.type == 'inClinic' ? Colors.orange : Colors.purple,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                   const Spacer(),
                                   if (widget.model.appointmentFee != null)
                                     Container(
@@ -231,6 +257,14 @@ class _UpcomingAppointmentsCardState extends State<UpcomingAppointmentsCard> {
                         widget.model.inviteDoctor == null
                             ? GestureDetector(
                               onTap: () async {
+                                if (!canJoin) {
+                                  HelperMethods.showFloatingToast(
+                                    context,
+                                    message: "You can only invite during the meeting time",
+                                  );
+                                  return;
+                                }
+
                                 await widget.provider.fetchDoctorList();
 
                                 TextEditingController searchController =
@@ -374,10 +408,6 @@ class _UpcomingAppointmentsCardState extends State<UpcomingAppointmentsCard> {
                                                               .appointmentId ??
                                                           "",
                                                     );
-
-                                                Navigator.pop(
-                                                  context,
-                                                ); // bottom sheet close
                                               },
                                               child: const Text("Send Invite"),
                                             ),
@@ -424,6 +454,7 @@ class _UpcomingAppointmentsCardState extends State<UpcomingAppointmentsCard> {
           ),
         ),
       ],
+    ),
     );
   }
 

@@ -21,6 +21,8 @@ class AppUrl {
   static const String profile = '$baseUrl/api/vendor/auth/profile';
 
   // New endpoints
+  static const String cancelAppointment = '$baseUrl/api/vendor/appointment/cancel';
+  static const String rescheduleAppointment = '$baseUrl/api/vendor/appointment/reschedule';
   static const String uploadPrescription = '$baseUrl/api/vendor/appointment/upload-prescription';
   static const String degreeList = '$baseUrl/api/vendor/common/degree/list';
   static const String dashboard = '$baseUrl/api/vendor/auth/dashboard';

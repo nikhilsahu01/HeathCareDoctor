@@ -170,10 +170,12 @@ class NewAppointmentsCard extends StatelessWidget {
                     height: 70,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
-                      image: const DecorationImage(
-                        image: NetworkImage('https://img.freepik.com/free-photo/businessman-formal-wear-professional-corporate-concept_53876-71166.jpg?semt=ais_hybrid&w=740&q=80'),
-                        fit: BoxFit.cover,
-                      ),
+                    ),
+                    child: const Image(
+                      image: NetworkImage('https://img.freepik.com/free-photo/businessman-formal-wear-professional-corporate-concept_53876-71166.jpg?semt=ais_hybrid&w=740&q=80'),
+                      height: 72,
+                      width: 72,
+                      fit: BoxFit.cover,
                     ),
                   ),
                   Positioned(
@@ -253,6 +255,22 @@ class NewAppointmentsCard extends StatelessWidget {
                   'Confirmed',
                   style: TextStyle(
                     color: ColorResource.primaryColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: model.type == 'inClinic' ? Colors.orange.shade50 : Colors.purple.shade50,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  model.type == 'inClinic' ? "In-Clinic" : "Video Call",
+                  style: TextStyle(
+                    color: model.type == 'inClinic' ? Colors.orange : Colors.purple,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),

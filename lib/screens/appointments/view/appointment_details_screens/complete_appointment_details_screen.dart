@@ -597,6 +597,88 @@ class _CompletedAppointmentsDetailsScreenState
                   ),
                 ),
 
+                // ==================== Latest Health Record ====================
+                if (model.latestHealthRecord != null) ...[
+                  const Text(
+                    "Latest Health Record",
+                    style: TextStyle(
+                      color: Color(0xFF171C20),
+                      fontSize: 18,
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.w600,
+                      height: 1.56,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () {
+                      final fileType = model.latestHealthRecord?.fileType ?? '';
+                      final isPdf = fileType.toLowerCase().contains('pdf') ||
+                          fileType.toLowerCase().contains('document') ||
+                          (model.latestHealthRecord?.url ?? '').toLowerCase().endsWith('.pdf');
+                      _showFullPreview(context, {
+                        'type': isPdf ? 'pdf' : 'image',
+                        'name': model.latestHealthRecord?.title ?? 'Health Record',
+                        'url': model.latestHealthRecord?.url ?? '',
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: ColorResource.primaryColor.withOpacity(0.3)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: ColorResource.primaryColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.description,
+                              color: ColorResource.primaryColor,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  model.latestHealthRecord?.title ?? "Health Record",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "Uploaded on: ${HelperMethods.formatAppointmentDate(model.latestHealthRecord?.createdAt ?? '')}",
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
                 // ==================== Consultation Transcript ====================
                 const Text(
                   "Consultation Transcript",
@@ -752,25 +834,18 @@ class _CompletedAppointmentsDetailsScreenState
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.chat_outlined),
-                          label: const Text("Start Chat"),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.videocam),
-                          label: const Text("Start Video Call"),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: Colors.blue,
-                          ),
+                        child: CustomAppButton(
+                          label: "Assign Aftercare / View Logs",
+                          onPressed: () async {
+                            navSlideFromRight(
+                              context, 
+                              AssignAftercareScreen(
+                                patientId: model.patient?.id ?? model.user?.id ?? '',
+                                appointmentId: widget.appointmentId,
+                                patientName: model.patient?.name ?? model.user?.name ?? 'Patient',
+                              )
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -782,20 +857,6 @@ class _CompletedAppointmentsDetailsScreenState
                       // navSlideFromRight(context, ReviewSubmissionPage(...));
                     },
                   ),
-                  const SizedBox(height: 12),
-                  CustomAppButton(
-                    label: "Assign Aftercare / View Logs",
-                    onPressed: () async {
-                      navSlideFromRight(
-                        context, 
-                        AssignAftercareScreen(
-                          patientId: model.patient?.id ?? model.user?.id ?? '',
-                          appointmentId: widget.appointmentId,
-                          patientName: model.patient?.name ?? model.user?.name ?? 'Patient',
-                        )
-                      );
-                    },
-                  ),
                 ] else ...[
                   CustomAppButton(
                     label: "Re-book",
@@ -805,23 +866,6 @@ class _CompletedAppointmentsDetailsScreenState
                   ),
                 ],
 
-                const SizedBox(height: 20),
-
-                // Cancel Appointment (only if not cancelled)
-                if (widget.isCancelledAppointment == false)
-                  Center(
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        "Cancel Appointment",
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
           );

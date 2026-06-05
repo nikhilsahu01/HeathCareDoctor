@@ -107,52 +107,53 @@ class AppointmentsRepository {
     }
   }
 
-  // Future<bool> rescheduleAppointment({
-  //   required String id,
-  //   required String newDate,
-  //   required String newTime,
-  //   required String rescheduleReason,
-  // }) async {
-  //   final body = {
-  //     "newDate": newDate,
-  //     "newTime": newTime,
-  //     "rescheduleReason": rescheduleReason, // avoid hardcoded ''
-  //   };
-  //
-  //   final url = '${AppUrl.rescheduleAppointment}/$id';
-  //
-  //   // 🔍 Print full request details
-  //   debugPrint("📤 Reschedule Appointment Request:");
-  //   debugPrint("➡️ URL: $url");
-  //   debugPrint("➡️ Body: $body");
-  //
-  //   try {
-  //     final response = await _apiService.postApiWithToken(body, url);
-  //     debugPrint("✅ Response: $response");
-  //     return response['status'] == true;
-  //   } catch (e) {
-  //     debugPrint("❌ Exception during reschedule request: $e");
-  //     rethrow;
-  //   }
-  // }
+  Future<bool> rescheduleAppointment({
+    required String id,
+    required String newDate,
+    required String newTime,
+    required String rescheduleReason,
+  }) async {
+    final body = {
+      "newDate": newDate,
+      "newTime": newTime,
+      "rescheduleReason": rescheduleReason,
+    };
+  
+    final url = '${AppUrl.rescheduleAppointment}/$id';
+  
+    debugPrint("📤 Reschedule Appointment Request:");
+    debugPrint("➡️ URL: $url");
+    debugPrint("➡️ Body: $body");
+  
+    try {
+      final response = await _apiService.postApiWithToken(body, url);
+      debugPrint("✅ Response: $response");
+      return response['status'] == true || response['success'] == true;
+    } catch (e) {
+      debugPrint("❌ Exception during reschedule request: $e");
+      rethrow;
+    }
+  }
 
-  // Future<bool> cancelAppointment({
-  //   required String id,
-  //   required String cancelReason,
-  // }) async {
-  //   final body = {
-  //     "cancellReason": cancelReason,
-  //   };
-  //   final url = '${AppUrl.cancelAppointment}/$id';
-  //   try {
-  //     final response = await _apiService.postApiWithToken(body, url);
-  //     debugPrint("✅ Response: $response");
-  //     return response['status'] == true;
-  //   } catch (e) {
-  //     debugPrint("❌ Exception during reschedule request: $e");
-  //     rethrow;
-  //   }
-  // }
+  Future<bool> cancelAppointment({
+    required String id,
+    required String cancelReason,
+    String refundMethod = "wallet",
+  }) async {
+    final body = {
+      "cancellReason": cancelReason,
+      "refundMethod": refundMethod,
+    };
+    final url = '${AppUrl.cancelAppointment}/$id';
+    try {
+      final response = await _apiService.postApiWithToken(body, url);
+      debugPrint("✅ Response: $response");
+      return response['status'] == true || response['success'] == true;
+    } catch (e) {
+      debugPrint("❌ Exception during cancel request: $e");
+      rethrow;
+    }
+  }
   // Future<bool> updateReminder({
   //   required String id,
   //

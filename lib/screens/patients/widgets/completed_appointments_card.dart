@@ -245,6 +245,22 @@ class CompletedAppointmentCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: model.type == 'inClinic' ? Colors.orange.shade50 : Colors.purple.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        model.type == 'inClinic' ? "In-Clinic" : "Video Call",
+                        style: TextStyle(
+                          color: model.type == 'inClinic' ? Colors.orange : Colors.purple,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

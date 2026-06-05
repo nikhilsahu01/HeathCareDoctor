@@ -477,6 +477,22 @@ class CompletedAppointmentCard extends StatelessWidget {
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: model.type == 'inClinic' ? Colors.orange.shade50 : Colors.purple.shade50,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      model.type == 'inClinic' ? "In-Clinic" : "Video Call",
+                                      style: TextStyle(
+                                        color: model.type == 'inClinic' ? Colors.orange : Colors.purple,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                   const Spacer(),
                                   if (model.netEarnings != null)
                                     Container(

@@ -467,27 +467,23 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
       );
     }
 
-    return Column(
-      children: [
-        Expanded(
-          child: AgoraVideoView(
-            controller: VideoViewController.remote(
-              rtcEngine: _engine!,
-              canvas: VideoCanvas(uid: _remoteUids[0]),
-              connection: RtcConnection(channelId: widget.channelName),
-            ),
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 4,
+        crossAxisSpacing: 4,
+      ),
+      itemCount: _remoteUids.length,
+      itemBuilder: (context, index) {
+        return AgoraVideoView(
+          controller: VideoViewController.remote(
+            rtcEngine: _engine!,
+            canvas: VideoCanvas(uid: _remoteUids[index]),
+            connection: RtcConnection(channelId: widget.channelName),
           ),
-        ),
-        Expanded(
-          child: AgoraVideoView(
-            controller: VideoViewController.remote(
-              rtcEngine: _engine!,
-              canvas: VideoCanvas(uid: _remoteUids[1]),
-              connection: RtcConnection(channelId: widget.channelName),
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -501,9 +497,10 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           /// CHAT
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
+          if (widget.isDoctor)
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
               FloatingActionButton(
                 heroTag: "chat",
                 backgroundColor: Colors.white,
@@ -859,31 +856,24 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_engine == null) {
-      return PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) async {
-          if (didPop) return;
-
-          try {
-
-            await _simplePip.enterPipMode();
-
-          } catch (e) {
-
-            debugPrint("PIP Error : $e");
-
-          }
-        },
-        child: Scaffold(
-          backgroundColor: Colors.black,
-          body: Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          ),
-        ),
-      );
-    }
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        try {
+          await _simplePip.enterPipMode();
+        } catch (e) {
+          debugPrint("PIP Error : $e");
+        }
+      },
+      child: _engine == null
+          ? const Scaffold(
+              backgroundColor: Colors.black,
+              body: Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+            )
+          : Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
@@ -924,10 +914,11 @@ class _AgoraVideoCallScreenState extends State<AgoraVideoCallScreen> {
               ),
             ),
           ),
-
+          
           _controls(),
         ],
       ),
+    ),
     );
   }
 }

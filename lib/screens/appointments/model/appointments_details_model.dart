@@ -202,6 +202,7 @@ class AppointmentDetailsData {
   num? amount;
   List<dynamic>? attachments;
   String? transcript;
+  HealthRecord? latestHealthRecord;
 
   AppointmentDetailsData(
       {this.appointmentId,
@@ -223,7 +224,8 @@ class AppointmentDetailsData {
         this.updatedAt,
         this.amount,
         this.attachments,
-        this.transcript});
+        this.transcript,
+        this.latestHealthRecord});
 
   AppointmentDetailsData.fromJson(Map<String, dynamic> json) {
     appointmentId = json['appointmentId'];
@@ -248,6 +250,9 @@ class AppointmentDetailsData {
     amount = json['amount'];
     attachments = json['attachments'] ?? [];
     transcript = json['transcript'];
+    latestHealthRecord = json['latestHealthRecord'] != null
+        ? new HealthRecord.fromJson(json['latestHealthRecord'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -278,6 +283,9 @@ class AppointmentDetailsData {
     data['amount'] = this.amount;
     data['attachments'] = this.attachments;
     data['transcript'] = this.transcript;
+    if (this.latestHealthRecord != null) {
+      data['latestHealthRecord'] = this.latestHealthRecord!.toJson();
+    }
     return data;
   }
 }
@@ -303,6 +311,34 @@ class User {
     data['name'] = this.name;
     data['profileImage'] = this.profileImage;
     data['age'] = this.age;
+    return data;
+  }
+}
+
+class HealthRecord {
+  String? id;
+  String? title;
+  String? url;
+  String? fileType;
+  String? createdAt;
+
+  HealthRecord({this.id, this.title, this.url, this.fileType, this.createdAt});
+
+  HealthRecord.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    title = json['title'];
+    url = json['url'];
+    fileType = json['fileType'];
+    createdAt = json['createdAt'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['title'] = this.title;
+    data['url'] = this.url;
+    data['fileType'] = this.fileType;
+    data['createdAt'] = this.createdAt;
     return data;
   }
 }
